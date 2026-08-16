@@ -32,7 +32,7 @@ import subprocess, json, time, urllib.request, os
 from playwright.sync_api import sync_playwright
 
 USER_DATA_DIR = "/tmp/playwright-brave-persistent"
-SESSION_FILE = "/tmp/brave_session_info.json"
+SESSION_FILE = "./.cache/session.json"
 
 def load_or_launch():
     """Check for existing Brave session; launch if none found or session is dead.

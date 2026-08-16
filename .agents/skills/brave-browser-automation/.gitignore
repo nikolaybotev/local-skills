@@ -1,0 +1,3 @@
+# Browser session state — not version controlled
+.cache/
+.venv/
