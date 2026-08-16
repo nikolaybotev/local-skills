@@ -28,73 +28,21 @@ python3 your_script.py
 **Run this ONCE when starting a browser automation task.** It checks if a session is alive and reconnects or launches as needed. Do NOT call this on every click/fill — it takes ~1.5 seconds due to the CDP handshake overhead.
 
 ```python
-import subprocess, json, time, urllib.request, os
-from playwright.sync_api import sync_playwright
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "scripts"))
+from load_or_launch import load_or_launch
 
-USER_DATA_DIR = "/tmp/playwright-brave-persistent"
-SESSION_FILE = "./.cache/session.json"
-
-def load_or_launch():
-    """Check for existing Brave session; launch if none found or session is dead.
-    Run ONCE at the start of work. Reuse the returned page for all subsequent actions."""
-    
-    # Check if a session file exists
-    if os.path.exists(SESSION_FILE):
-        with open(SESSION_FILE) as f:
-            info = json.load(f)
-        ws_url = info["ws_endpoint"]
-        
-        # Try to connect and verify the browser is responsive
-        with sync_playwright() as p:
-            try:
-                browser = p.chromium.connect_over_cdp(ws_url)
-                time.sleep(1)  # Let CDP settle
-                
-                if browser.contexts and browser.contexts[0].pages:
-                    page = browser.contexts[0].pages[0]
-                    _ = page.url  # Quick ping
-                    return browser, page, True  # reused=True
-                else:
-                    browser.close()
-            except Exception:
-                pass
-    
-    # Launch a new Brave session
-    proc = subprocess.Popen([
-        "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
-        "--remote-debugging-port=9322",
-        "--user-data-dir=" + USER_DATA_DIR,
-        "--no-first-run",
-        "--no-default-browser-check",
-    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    
-    time.sleep(5)
-    
-    resp = urllib.request.urlopen("http://localhost:9322/json/version")
-    data = json.loads(resp.read())
-    ws_url = data["webSocketDebuggerUrl"]
-    
-    # Save session info for future steps
-    session_info = {"ws_endpoint": ws_url}
-    with open(SESSION_FILE, "w") as f:
-        json.dump(session_info, f)
-    
-    # Connect and return
-    with sync_playwright() as p:
-        browser = p.chromium.connect_over_cdp(ws_url)
-        time.sleep(1)
-        context = browser.contexts[0]
-        page = context.new_page()
-        return browser, page, False  # reused=False
-
-# === Usage ===
-# browser, page, reused = load_or_launch()
-# if reused:
-#     print("Reconnected to existing session")
-# else:
-#     print("Launched new session")
-# # Now use 'page' for all actions — no need to call load_or_launch again
+browser, page, reused = load_or_launch()
+if reused:
+    print("Reconnected to existing session")
+else:
+    print("Launched new session")
+# Now use 'page' for all actions — no need to call load_or_launch again
 ```
+
+The script is at `scripts/load_or_launch.py` in the skill directory. It handles session detection, validation, and recovery automatically.
+
+To customize config (Brave path, debug port, user data dir), edit `scripts/load_or_launch.py` directly — all settings are at the top as module-level constants.
 
 ### Step 1+ — Interact with the page
 
