@@ -145,3 +145,28 @@ print("Brave closed. Session ended.")
 - The WebSocket URL from `/json/version` is the correct endpoint (not `/devtools/browser/default`)
 - If port 9322 is in use, pick a different port (e.g., 9323)
 - Do not mix `launch_persistent_context()` with `connect_over_cdp()` — use one or the other
+
+### Tips
+
+#### Faster page loads
+
+Use `wait_until='domcontentloaded'` instead of the default `'load'` when navigating to SPAs or pages with heavy assets. It waits for the DOM to be ready but skips waiting for images, stylesheets, and other subresources:
+
+```python
+page.goto("https://example.com", wait_until='domcontentloaded')
+```
+
+This can shave seconds off navigation time on complex pages.
+
+#### Efficient data extraction
+
+Use `eval_on_selector_all()` to run JavaScript in-page and extract structured data from all matching elements at once, instead of iterating element-by-element:
+
+```python
+# Extract all links in one call instead of looping
+links = page.eval_on_selector_all('a', 'els => els.map(e => ({href: e.href, text: e.innerText.trim()}))')
+for link in links:
+    print(link['href'], link['text'])
+```
+
+This avoids multiple round-trips between Python and the browser, which adds up with many elements.
