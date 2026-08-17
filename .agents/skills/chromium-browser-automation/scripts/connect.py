@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Attach to the existing Brave CDP session. Never launches. Never closes Brave.
+"""Attach to the existing CDP session. Never launches. Never closes the browser.
 
 Tab model: pages[0] is the main working tab. Extra pages are transient popups
 (site pickers, window.open). Verbs default to main. --popup acts on the newest
@@ -60,7 +60,7 @@ def popup_page(browser):
 
 
 def connect_browser(playwright):
-    """Return a CDP browser. Exits 2 if the session is gone. Does not close Brave."""
+    """Return a CDP browser. Exits 2 if the session is gone. Does not close the browser."""
     try:
         browser = playwright.chromium.connect_over_cdp(CDP_HTTP)
     except Exception as exc:
@@ -84,7 +84,7 @@ def connect_browser(playwright):
 
 
 def connect_page(playwright, popup=False):
-    """Return (browser, page) for main or the newest popup. Does not close Brave."""
+    """Return (browser, page) for main or the newest popup. Does not close the browser."""
     browser = connect_browser(playwright)
     page = popup_page(browser) if popup else main_page(browser)
     return browser, page

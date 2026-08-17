@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One-action CLI against the existing Brave session. Never launches. Never closes Brave.
+"""One-action CLI against the existing CDP session. Never launches. Never closes the browser.
 
 Default target is main tab[0]. Pass --popup to act on the newest extra tab
 (site picker / window.open), then close-popup and continue on main.
@@ -163,7 +163,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
 def build_parser():
     parser = ArgumentParser(
-        description="Run one action against the existing Brave CDP session.",
+        description="Run one action against the existing CDP session.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent(
             """\
