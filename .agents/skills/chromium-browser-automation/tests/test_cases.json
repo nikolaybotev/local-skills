@@ -1,18 +1,18 @@
 [
   {
-    "prompt": "Click through this site in Brave and extract the heading text.",
+    "prompt": "Click through this site in Chrome and extract the heading text.",
     "expected_skill_trigger": true,
-    "description": "Visible Brave interaction — should trigger"
+    "description": "Visible Chrome interaction — should trigger"
   },
   {
     "prompt": "Keep a Brave window open and fill this form across multiple steps.",
     "expected_skill_trigger": true,
-    "description": "Persistent visible session — should trigger"
+    "description": "Persistent visible Brave session — should trigger"
   },
   {
-    "prompt": "I need to scrape a website using Chrome in a real window I can see.",
+    "prompt": "I need to scrape a website using Edge in a real window I can see.",
     "expected_skill_trigger": true,
-    "description": "Same workflow on Chrome — should trigger"
+    "description": "Visible Edge session — should trigger"
   },
   {
     "prompt": "How do I keep a browser session alive across multiple Playwright invocations?",

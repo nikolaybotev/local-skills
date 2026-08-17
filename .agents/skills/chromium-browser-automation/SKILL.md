@@ -1,13 +1,13 @@
 ---
-name: brave-browser-automation
-description: Drive a visible Brave browser that stays open across steps. Use whenever the user wants to interact with a live website in a real window — click, fill forms, scrape, log in, or keep a browser session alive. Also applies to Chrome/Chromium when they want the same persistent visible-browser workflow. Do not use for writing Playwright/Cypress test files, headless CI tests, or general programming questions about those frameworks.
+name: chromium-browser-automation
+description: Drive a visible Chromium-family browser that stays open across steps. Use whenever the user wants to interact with a live website in a real window — click, fill forms, scrape, log in, or keep a browser session alive. Works with system Chrome, Chromium, Brave, Edge, or Playwright Chromium, all over CDP with a dedicated profile. Do not use for writing Playwright/Cypress test files, headless CI tests, or general programming questions about those frameworks.
 ---
 
-# Brave Browser Automation
+# Chromium Browser Automation
 
-Brave is long-lived. Python is short-lived. After init, every action is one shell command that connects, does one thing, prints a result, and exits.
+The browser is long-lived. Python is short-lived. After init, every action is one shell command that connects, does one thing, prints a result, and exits.
 
-Do not write multi-step Playwright scripts. Do not keep a `page` object across steps. Do not relaunch the browser if a later command fails to connect.
+Do not write multi-step Playwright scripts. Do not keep a `page` object across steps. Do not relaunch the browser if a later command fails to connect. Do not use `chromium.launch()` or `launch_persistent_context()` — this skill attaches over CDP only.
 
 ## Procedure
 
@@ -19,19 +19,41 @@ Do not write multi-step Playwright scripts. Do not keep a `page` object across s
 bash "$SKILL_DIR/scripts/setup.sh"
 ```
 
-Creates `.venv` and installs Playwright’s Python package if needed. Reuses the venv when `import playwright` already works. Does not download Playwright’s Chromium; this skill drives system Brave.
+Creates `.venv` and installs the Playwright Python package if needed. Reuses the venv when `import playwright` already works.
 
-### 2. Ensure session (on demand)
+### 2. Choose the engine (once per machine)
+
+If `"$PY" "$SKILL_DIR/scripts/configure_browser.py" --show` fails, **ask the user** which engine to use. Do not guess. Do not present this as a shell prompt — ask in the conversation.
+
+Choices (all CDP, dedicated profile under `$SKILL_DIR/.cache/user-data`, not the user's daily browser):
+
+| id | Engine |
+|----|--------|
+| `chrome` | System Google Chrome |
+| `chromium` | System Chromium |
+| `brave` | System Brave |
+| `edge` | System Microsoft Edge |
+| `playwright-chromium` | Playwright's Chromium binary (installed on demand) |
+
+Then:
+
+```bash
+"$PY" "$SKILL_DIR/scripts/configure_browser.py" chrome
+```
+
+Replace `chrome` with the id they chose. If they pick `playwright-chromium`, this command installs that binary.
+
+### 3. Ensure session (on demand)
 
 ```bash
 "$PY" "$SKILL_DIR/scripts/ensure_session.py"
 ```
 
-Probes `http://127.0.0.1:9322`. Reuses Brave if it is already listening; launches only if the port is not responding. Prints `status=reused` or `status=launched`, the CDP URL, and open tabs.
+Probes `http://127.0.0.1:9322`. Reuses the browser if it is already listening; launches the configured engine only if the port is not responding. Prints `status=reused` or `status=launched`, `engine=`, the CDP URL, and open tabs.
 
 If this command fails (exit 1), stop and tell the user. Do not continue to work commands.
 
-### 3. Snapshot, then work
+### 4. Snapshot, then work
 
 ```bash
 "$PY" "$SKILL_DIR/scripts/do.py" snapshot
@@ -54,10 +76,10 @@ Run `"$PY" "$SKILL_DIR/scripts/do.py" --help` to list verbs.
 | Code | Meaning | What to do |
 |------|---------|------------|
 | 0 | Success | Read stdout (`OK url=...`) and continue |
-| 1 | Action failed (bad selector, timeout, usage) | Session is still assumed live. Try a different selector or verb. Do not relaunch Brave |
+| 1 | Action failed (bad selector, timeout, usage) | Session is still assumed live. Try a different selector or verb. Do not relaunch the browser |
 | 2 | `SESSION_DEAD` — CDP connect failed | **Stop.** Report progress so far and the stderr error to the user. Do not relaunch, retry connect, or call `ensure_session.py` unless the user asks to start again |
 
-`ensure_session.py` and `setup.sh` only use 0 / 1. Exit 2 is reserved for a dead session during work.
+`setup.sh`, `configure_browser.py`, and `ensure_session.py` only use 0 / 1. Exit 2 is reserved for a dead session during work.
 
 ## Verbs
 
@@ -109,7 +131,7 @@ If you (the human) accidentally opened a tab, that is drift: `close-popup` or fi
 
 ## Fail-fast after init
 
-If `do.py` prints `SESSION_DEAD:` and exits 2, the user probably closed Brave or it crashed. Do not recover:
+If `do.py` prints `SESSION_DEAD:` and exits 2, the user probably closed the browser or it crashed. Do not recover:
 
 1. Stop issuing browser commands.
 2. Tell the user what already succeeded.
@@ -122,17 +144,17 @@ Do not swallow exceptions in custom code. The CLIs already print the error and s
 
 ## When the user is done
 
-Leave Brave open unless they explicitly ask to close it.
+Leave the browser open unless they explicitly ask to close it.
 
 ```bash
 "$PY" "$SKILL_DIR/scripts/stop.py"
 ```
 
-This only signals the process that has this skill’s `--user-data-dir` and debug port. It does not `killall` Brave.
+This only signals the process that has this skill’s `--user-data-dir` and debug port. It does not `killall` Chrome, Brave, or Edge.
 
 ## Escape hatch
 
-Only if no verb can express the action, write a **one-action** script that imports `connect_page`, does one thing, prints a result, and exits. Do not launch Brave. Do not call `browser.close()`. Do not catch a connect failure and retry — let it hit `SESSION_DEAD` (exit 2).
+Only if no verb can express the action, write a **one-action** script that imports `connect_page`, does one thing, prints a result, and exits. Do not launch the browser. Do not call `browser.close()`. Do not catch a connect failure and retry — let it hit `SESSION_DEAD` (exit 2).
 
 ```bash
 cd "$SKILL_DIR"
@@ -154,18 +176,19 @@ with sync_playwright() as p:
 
 | Variable | Default |
 |----------|---------|
-| `BRAVE_PATH` | macOS `/Applications/Brave Browser.app/Contents/MacOS/Brave Browser` |
-| `BRAVE_DEBUG_PORT` | `9322` |
+| `BROWSER_PATH` | Executable from `configure_browser.py` (`.cache/browser.json`) |
+| `CDP_PORT` | `9322` |
 
-User data lives in `$SKILL_DIR/.cache/brave-user-data` so cookies persist without touching the user’s personal profile.
+User data lives in `$SKILL_DIR/.cache/user-data` so cookies persist without touching the user’s personal profile.
 
 ## Do not
 
 - Call `ensure_session.py` again after a work-loop `SESSION_DEAD` unless the user asked to restart
 - Write a script that clicks, fills, and navigates in one process
 - Use `time.sleep` loops or `while True` to wait for the page
-- Mix `launch_persistent_context()` with this CDP session
+- Mix `launch_persistent_context()` or `chromium.launch()` with this CDP session
 - Close the browser at the end of a verb
 - Open a new tab (`window.open`, `new_page`, “open in new tab”) — `goto` on main instead
 - Keep working with `--popup` after the picker is done — close extras and return to tab[0]
 - Rewrite `target=_blank` to `_self`; that can break picker popups. Use `--popup` instead
+- Guess the engine — ask once, then `configure_browser.py`
