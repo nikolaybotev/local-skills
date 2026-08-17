@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Ensure a Brave instance is listening on the CDP port. Launch only if needed.
+"""Ensure the configured browser is listening on the CDP port. Launch only if needed.
 
-Does not import Playwright. Does not return browser handles.
-Prints a short status block on stdout. Diagnostics go to stderr.
+Does not return browser handles. Prints a short status block on stdout.
+Diagnostics go to stderr.
 
 Exit 0 if a session is ready (reused or launched).
-Exit 1 if launch/probe fails. Never exits 2 — that code is for work-loop
-connect failures after init has already succeeded.
+Exit 1 if launch/probe fails, or if no browser has been configured.
+Never exits 2 — that code is for work-loop connect failures after init.
 """
 
 import json
@@ -17,7 +17,6 @@ import time
 import urllib.error
 
 from config import (
-    BRAVE_PATH,
     CACHE_DIR,
     CDP_HTTP,
     DEBUG_PORT,
@@ -28,6 +27,7 @@ from config import (
     fetch_json,
     is_connection_refused,
     probe_version,
+    require_browser_config,
 )
 
 LAUNCH_WAIT_SECONDS = 30
@@ -50,10 +50,11 @@ def tab_lines():
     return lines
 
 
-def print_status(status, version):
+def print_status(status, version, cfg):
     ws = version.get("webSocketDebuggerUrl", "")
     lines = tab_lines()
     print(f"status={status}")
+    print(f"engine={cfg['id']}")
     print(f"cdp={CDP_HTTP}")
     if ws:
         print(f"ws={ws}")
@@ -63,11 +64,12 @@ def print_status(status, version):
         print(line)
 
 
-def launch_brave():
-    if not os.path.isfile(BRAVE_PATH):
+def launch_browser(cfg):
+    binary = cfg["path"]
+    if not os.path.isfile(binary):
         print(
-            f"FAIL: Brave not found at {BRAVE_PATH}. "
-            "Install Brave or set BRAVE_PATH.",
+            f"FAIL: browser not found at {binary}. "
+            "Re-run configure_browser.py or set BROWSER_PATH.",
             file=sys.stderr,
         )
         sys.exit(EXIT_ACTION)
@@ -76,17 +78,17 @@ def launch_brave():
     os.makedirs(USER_DATA_DIR, exist_ok=True)
 
     print(
-        f"port {DEBUG_PORT} not responding, launching Brave",
+        f"port {DEBUG_PORT} not responding, launching {cfg['id']}",
         file=sys.stderr,
     )
-    print(f"binary={BRAVE_PATH}", file=sys.stderr)
+    print(f"binary={binary}", file=sys.stderr)
     print(f"user-data-dir={USER_DATA_DIR}", file=sys.stderr)
     print(f"launch-log={LAUNCH_LOG}", file=sys.stderr)
 
     logf = open(LAUNCH_LOG, "ab")
     proc = subprocess.Popen(
         [
-            BRAVE_PATH,
+            binary,
             f"--remote-debugging-port={DEBUG_PORT}",
             "--remote-allow-origins=*",
             f"--user-data-dir={USER_DATA_DIR}",
@@ -132,7 +134,7 @@ def launch_brave():
         pass
 
     print(
-        f"FAIL: Brave did not open CDP on {CDP_HTTP} within "
+        f"FAIL: {cfg['id']} did not open CDP on {CDP_HTTP} within "
         f"{LAUNCH_WAIT_SECONDS}s (pid={proc.pid}, poll={proc.poll()}): {last_err}",
         file=sys.stderr,
     )
@@ -143,6 +145,8 @@ def launch_brave():
 
 
 def main():
+    cfg = require_browser_config()
+
     try:
         version = probe_version()
     except urllib.error.HTTPError as exc:
@@ -159,11 +163,11 @@ def main():
         sys.exit(EXIT_ACTION)
 
     if version is not None:
-        print_status("reused", version)
+        print_status("reused", version, cfg)
         sys.exit(EXIT_OK)
 
-    version = launch_brave()
-    print_status("launched", version)
+    version = launch_browser(cfg)
+    print_status("launched", version, cfg)
     sys.exit(EXIT_OK)
 
 
