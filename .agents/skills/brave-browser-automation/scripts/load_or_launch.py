@@ -21,7 +21,7 @@ import sys
 # ---------------------------------------------------------------------------
 # Config — tweak these if needed
 # ---------------------------------------------------------------------------
-USER_DATA_DIR = "/tmp/playwright-brave-persistent"
+USER_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".cache", "brave-user-data")
 SESSION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".cache", "session.json")
 BRAVE_PATH = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
 DEBUG_PORT = 9322
