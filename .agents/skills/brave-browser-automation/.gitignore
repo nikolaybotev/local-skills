@@ -1,3 +1,4 @@
 # Browser session state — not version controlled
 .cache/
 .venv/
+__pycache__/
