@@ -1,27 +1,32 @@
 [
   {
-    "prompt": "I need to automate a website using Brave browser. Can you help me set up Playwright to control it?",
+    "prompt": "Click through this site in Brave and extract the heading text.",
     "expected_skill_trigger": true,
-    "description": "User wants to automate a website with Brave - should trigger the skill"
+    "description": "Visible Brave interaction — should trigger"
   },
   {
-    "prompt": "I want to use Playwright to interact with Brave browser across multiple steps",
+    "prompt": "Keep a Brave window open and fill this form across multiple steps.",
     "expected_skill_trigger": true,
-    "description": "User mentions Playwright + Brave - should trigger"
+    "description": "Persistent visible session — should trigger"
+  },
+  {
+    "prompt": "I need to scrape a website using Chrome in a real window I can see.",
+    "expected_skill_trigger": true,
+    "description": "Same workflow on Chrome — should trigger"
   },
   {
     "prompt": "How do I keep a browser session alive across multiple Playwright invocations?",
     "expected_skill_trigger": true,
-    "description": "User asks about persistent browser sessions - should trigger"
+    "description": "Persistent browser session — should trigger"
   },
   {
-    "prompt": "I need to scrape a website using Chrome",
+    "prompt": "Write a Playwright pytest for our CI pipeline.",
     "expected_skill_trigger": false,
-    "description": "User mentions Chrome, not Brave - should NOT trigger (different browser)"
+    "description": "Test-file authoring — should NOT trigger"
   },
   {
     "prompt": "Can you help me set up a headless browser for testing?",
     "expected_skill_trigger": false,
-    "description": "Generic headless browser question - should NOT trigger (not Brave-specific)"
+    "description": "Generic headless testing — should NOT trigger"
   }
 ]
