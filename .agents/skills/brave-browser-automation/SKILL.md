@@ -1,120 +1,171 @@
 ---
 name: brave-browser-automation
-description: Automate Brave browser via Playwright CDP connection. Use this skill whenever the user wants to automate a browser, control Brave/Chrome/Chromium programmatically, keep a browser session alive across multiple steps, or interact with websites through a persistent browser instance. Trigger when the user mentions Playwright, browser automation, CDP, remote debugging, persistent browser sessions, or wants to control a browser from code. Also trigger for web scraping, testing, or any browser control task that needs to span multiple script invocations. If the user mentions "browser", "automation", "Playwright", "CDP", "remote debugging", or "persistent session" in the context of web interaction, use this skill.
+description: Drive a visible Brave browser that stays open across steps. Use whenever the user wants to interact with a live website in a real window — click, fill forms, scrape, log in, or keep a browser session alive. Also applies to Chrome/Chromium when they want the same persistent visible-browser workflow. Do not use for writing Playwright/Cypress test files, headless CI tests, or general programming questions about those frameworks.
 ---
 
-## Brave Browser Automation via Playwright CDP
+# Brave Browser Automation
 
-When the user needs to interact with a website through a visible Brave (or Chromium-based) browser instance, use this pattern. The key principle: **launch Brave once in the background, then reconnect to it on every subsequent step**. Never use `browser.close()` until the user is done.
+Brave is long-lived. Python is short-lived. After init, every action is one shell command that connects, does one thing, prints a result, and exits.
 
-### Setup (one-time, run once per machine)
+Do not write multi-step Playwright scripts. Do not keep a `page` object across steps. Do not relaunch the browser if a later command fails to connect.
 
-Before using this skill, ensure dependencies are installed:
+## Procedure
 
-```bash
-cd <skill-dir>   # Path to this skill's directory
-bash scripts/setup.sh
-```
+`SKILL_DIR` is the directory that contains this `SKILL.md`. `PY` is `$SKILL_DIR/.venv/bin/python`. Always call `$PY` — do not `source` the venv.
 
-This creates a `.venv` with Playwright and installs Chromium browsers. All subsequent Python code should run inside this venv:
+### 1. Setup (on demand)
 
 ```bash
-source .venv/bin/activate
-python3 your_script.py
+bash "$SKILL_DIR/scripts/setup.sh"
 ```
 
-### Step 0 — Load or Launch (run once at the start of work)
+Creates `.venv` and installs Playwright’s Python package if needed. Reuses the venv when `import playwright` already works. Does not download Playwright’s Chromium; this skill drives system Brave.
 
-**Run this ONCE when starting a browser automation task.** It checks if a session is alive and reconnects or launches as needed. Do NOT call this on every click/fill — it takes ~1.5 seconds due to the CDP handshake overhead.
+### 2. Ensure session (on demand)
+
+```bash
+"$PY" "$SKILL_DIR/scripts/ensure_session.py"
+```
+
+Probes `http://127.0.0.1:9322`. Reuses Brave if it is already listening; launches only if the port is not responding. Prints `status=reused` or `status=launched`, the CDP URL, and open tabs.
+
+If this command fails (exit 1), stop and tell the user. Do not continue to work commands.
+
+### 3. Snapshot, then work
+
+```bash
+"$PY" "$SKILL_DIR/scripts/do.py" snapshot
+```
+
+Then run **one verb per command**. Read stdout. Check the exit code before the next command.
+
+```bash
+"$PY" "$SKILL_DIR/scripts/do.py" goto "https://example.com"
+"$PY" "$SKILL_DIR/scripts/do.py" click "text=More information"
+"$PY" "$SKILL_DIR/scripts/do.py" fill "#email" "user@host"
+"$PY" "$SKILL_DIR/scripts/do.py" text "h1"
+"$PY" "$SKILL_DIR/scripts/do.py" screenshot
+```
+
+Run `"$PY" "$SKILL_DIR/scripts/do.py" --help` to list verbs.
+
+## Exit codes
+
+| Code | Meaning | What to do |
+|------|---------|------------|
+| 0 | Success | Read stdout (`OK url=...`) and continue |
+| 1 | Action failed (bad selector, timeout, usage) | Session is still assumed live. Try a different selector or verb. Do not relaunch Brave |
+| 2 | `SESSION_DEAD` — CDP connect failed | **Stop.** Report progress so far and the stderr error to the user. Do not relaunch, retry connect, or call `ensure_session.py` unless the user asks to start again |
+
+`ensure_session.py` and `setup.sh` only use 0 / 1. Exit 2 is reserved for a dead session during work.
+
+## Verbs
+
+Each invocation attaches over CDP, acts on **main tab[0]** unless `--popup` is passed, prints `OK url=`, `title=`, `target=`, and `extra_tabs=`, then disconnects. It never calls `browser.close()`. It never opens a tab.
+
+| Verb | Args | Notes |
+|------|------|--------|
+| `snapshot` | | URL, title, tab roles, visible body text (truncated) |
+| `goto` | URL | Navigates the **current target** in place. Prefer this over a new tab |
+| `click` | SELECTOR | CSS or Playwright selectors (`text=Submit`, `#id`) |
+| `fill` | SELECTOR VALUE | Clears, then fills |
+| `text` | SELECTOR | Prints `text=...` |
+| `screenshot` | [PATH] | Default `$SKILL_DIR/.cache/screenshot.png`. `--full-page` allowed |
+| `press` | KEY | e.g. `Enter`, `Meta+a` |
+| `wait` | SELECTOR | Until it appears (default 15s timeout) |
+| `eval` | JS... | One expression in the page; prints `result=...` |
+| `close-popup` | | Close every tab except main tab[0]. Then continue **without** `--popup` |
+
+`--popup` before the verb acts on the newest extra tab (a site picker or `window.open`). If no extra tab exists, exit 1 with `FAIL: no popup tab`.
+
+Default action timeout is 15s (`--timeout` milliseconds before the verb). Prefer Playwright auto-wait over `sleep`.
+
+One action means one of the rows above. Login, submitting a whole form, pagination, and retry loops are sequences of commands — not one script.
+
+## One main tab, optional popup
+
+This browser is dedicated to the task. **Tab[0] is home.** Do not open tabs (`window.open`, `new_page`, “open in new tab”). Need another URL → `goto` on main.
+
+Sites may still open a popup (dropdown search, OAuth, `target=_blank`). That is a **temporary overlay**, not a second workspace:
+
+1. A command on main prints `extra_tabs=1` and `popup_url=...`.
+2. Use `--popup` for the picker (snapshot / click / fill / text).
+3. If the site does not close it, `close-popup`.
+4. Drop `--popup` and finish the task on main. Check `extra_tabs=0`.
+
+```bash
+"$PY" "$SKILL_DIR/scripts/do.py" click "#search-place"
+# stdout includes extra_tabs=1 and popup_url=...
+"$PY" "$SKILL_DIR/scripts/do.py" --popup snapshot
+"$PY" "$SKILL_DIR/scripts/do.py" --popup fill "#q" "Sofia"
+"$PY" "$SKILL_DIR/scripts/do.py" --popup click "text=Sofia, Bulgaria"
+"$PY" "$SKILL_DIR/scripts/do.py" close-popup   # skip if extra_tabs=0 already
+"$PY" "$SKILL_DIR/scripts/do.py" click "button[type=submit]"
+```
+
+Do not treat extra tabs as a list to browse. There is no `tab INDEX` switch. If `extra_tabs>1`, `--popup` is the newest extra; `close-popup` closes all extras and returns to main.
+
+If you (the human) accidentally opened a tab, that is drift: `close-popup` or fix the window and ask the agent to resume. If you closed the original tab, the oldest remaining page becomes the new tab[0] — fix the window if that is wrong, then resume.
+
+## Fail-fast after init
+
+If `do.py` prints `SESSION_DEAD:` and exits 2, the user probably closed Brave or it crashed. Do not recover:
+
+1. Stop issuing browser commands.
+2. Tell the user what already succeeded.
+3. Quote the error.
+4. Ask whether to run setup + `ensure_session.py` again. That is a new init, not a retry inside the work loop.
+
+Selector/timeout failures are exit 1. Keep going with another verb if that still makes sense.
+
+Do not swallow exceptions in custom code. The CLIs already print the error and set the exit code.
+
+## When the user is done
+
+Leave Brave open unless they explicitly ask to close it.
+
+```bash
+"$PY" "$SKILL_DIR/scripts/stop.py"
+```
+
+This only signals the process that has this skill’s `--user-data-dir` and debug port. It does not `killall` Brave.
+
+## Escape hatch
+
+Only if no verb can express the action, write a **one-action** script that imports `connect_page`, does one thing, prints a result, and exits. Do not launch Brave. Do not call `browser.close()`. Do not catch a connect failure and retry — let it hit `SESSION_DEAD` (exit 2).
+
+```bash
+cd "$SKILL_DIR"
+PYTHONPATH=scripts "$PY" /tmp/one_action.py
+```
 
 ```python
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "scripts"))
-from load_or_launch import load_or_launch
+from playwright.sync_api import sync_playwright
+from connect import connect_page
 
-browser, page, reused = load_or_launch()
-if reused:
-    print("Reconnected to existing session")
-else:
-    print("Launched new session")
-# Now use 'page' for all actions — no need to call load_or_launch again
+with sync_playwright() as p:
+    browser, page = connect_page(p)
+    page.set_default_timeout(15000)
+    # one action only, then print
+    print(f"OK url={page.url}")
 ```
 
-The script is at `scripts/load_or_launch.py` in the skill directory. It handles session detection, validation, and recovery automatically.
+## Config
 
-To customize config (Brave path, debug port, user data dir), edit `scripts/load_or_launch.py` directly — all settings are at the top as module-level constants.
+| Variable | Default |
+|----------|---------|
+| `BRAVE_PATH` | macOS `/Applications/Brave Browser.app/Contents/MacOS/Brave Browser` |
+| `BRAVE_DEBUG_PORT` | `9322` |
 
-### Step 1+ — Interact with the page
+User data lives in `$SKILL_DIR/.cache/brave-user-data` so cookies persist without touching the user’s personal profile.
 
-Use the `page` object returned from `load_or_launch()` for all actions. No need to reconnect:
+## Do not
 
-```python
-# All actions use the same 'page' object
-page.goto("https://example.com")
-time.sleep(2)
-page.click("button#submit")
-time.sleep(1)
-content = page.inner_text("#result")
-# ... etc
-```
-
-### Key rules
-
-1. **Never call `browser.close()`** while the user is still working. Only close when the session is truly done.
-2. **Call `load_or_launch()` ONCE at the start of a task** — it returns a `page` object to reuse for all subsequent actions. Do NOT call it on every click/fill.
-3. **Use the same `--user-data-dir`** every time to persist cookies, extensions, and session state.
-4. The `contexts[0]` approach works because connecting over CDP gives you access to the existing browser context.
-
-### When the user is done
-
-Only when the user explicitly says they're done with browser automation:
-
-```python
-browser.close()
-os.remove("/tmp/brave_session_info.json")  # Clean up session file
-print("Brave closed. Session ended.")
-```
-
-### Cross-platform notes
-
-- **macOS**: `/Applications/Brave Browser.app/Contents/MacOS/Brave Browser`
-- **Windows**: `%LOCALAPPDATA%\BraveSoftware\Brave-Browser\Application\brave.exe`
-- **Linux**: `/usr/bin/brave-browser` (or `brave` depending on installation)
-
-### Troubleshooting
-
-- **Connection refused**: Brave may have crashed. Kill all Brave processes (`killall Brave Browser`) and restart.
-- **Port conflict**: If 9322 is busy, try `--remote-debugging-port=9323` and update the URL accordingly.
-- **CDP disconnect**: If the connection drops, call `load_or_launch()` again — it will detect the dead session and start fresh.
-
-### Common pitfalls
-
-- `browser.contexts` is `None` right after `connect_over_cdp()` — always `time.sleep(1)` first
-- The WebSocket URL from `/json/version` is the correct endpoint (not `/devtools/browser/default`)
-- If port 9322 is in use, pick a different port (e.g., 9323)
-- Do not mix `launch_persistent_context()` with `connect_over_cdp()` — use one or the other
-
-### Tips
-
-#### Faster page loads
-
-Use `wait_until='domcontentloaded'` instead of the default `'load'` when navigating to SPAs or pages with heavy assets. It waits for the DOM to be ready but skips waiting for images, stylesheets, and other subresources:
-
-```python
-page.goto("https://example.com", wait_until='domcontentloaded')
-```
-
-This can shave seconds off navigation time on complex pages.
-
-#### Efficient data extraction
-
-Use `eval_on_selector_all()` to run JavaScript in-page and extract structured data from all matching elements at once, instead of iterating element-by-element:
-
-```python
-# Extract all links in one call instead of looping
-links = page.eval_on_selector_all('a', 'els => els.map(e => ({href: e.href, text: e.innerText.trim()}))')
-for link in links:
-    print(link['href'], link['text'])
-```
-
-This avoids multiple round-trips between Python and the browser, which adds up with many elements.
+- Call `ensure_session.py` again after a work-loop `SESSION_DEAD` unless the user asked to restart
+- Write a script that clicks, fills, and navigates in one process
+- Use `time.sleep` loops or `while True` to wait for the page
+- Mix `launch_persistent_context()` with this CDP session
+- Close the browser at the end of a verb
+- Open a new tab (`window.open`, `new_page`, “open in new tab”) — `goto` on main instead
+- Keep working with `--popup` after the picker is done — close extras and return to tab[0]
+- Rewrite `target=_blank` to `_self`; that can break picker popups. Use `--popup` instead
