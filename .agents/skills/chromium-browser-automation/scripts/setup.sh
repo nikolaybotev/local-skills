@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Create the skill venv on first use; reuse it when Playwright is already importable.
-# Does not download Playwright's Chromium — this skill drives system Brave over CDP.
+# Playwright's Chromium binary is installed only if the user picks that engine.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -8,7 +8,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 VENV_DIR="$ROOT_DIR/.venv"
 VENV_PY="$VENV_DIR/bin/python"
 
-echo "=== Brave Browser Automation Skill Setup ==="
+echo "=== Chromium Browser Automation Skill Setup ==="
 
 if ! command -v python3 &>/dev/null; then
     echo "ERROR: python3 not found. Install Python 3.14 via mise (see mise.toml) or Homebrew."
@@ -42,4 +42,4 @@ fi
 echo ""
 echo "=== Setup complete ==="
 echo "Python: $VENV_PY"
-echo "This skill uses system Brave over CDP; Playwright's Chromium is not installed."
+echo "Next: ask the user which engine to use, then run scripts/configure_browser.py"

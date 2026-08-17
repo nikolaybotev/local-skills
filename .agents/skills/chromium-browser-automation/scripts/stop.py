@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Stop the Brave instance that was launched for this skill.
+"""Stop the browser instance that was launched for this skill.
 
 Only kills a process whose command line contains this skill's user-data-dir
-and remote-debugging-port. Never killall. Does not touch the user's personal Brave.
+and remote-debugging-port. Never killall. Does not touch the user's personal
+browser profile.
 """
 
 import os
@@ -45,7 +46,7 @@ def main():
             print(f"cdp=http://127.0.0.1:{DEBUG_PORT}")
             sys.exit(EXIT_OK)
         print(
-            "FAIL: CDP is still up but no matching Brave process was found. "
+            "FAIL: CDP is still up but no matching browser process was found. "
             "Not killing unrelated browsers.",
             file=sys.stderr,
         )

@@ -6,7 +6,7 @@ Each skill is a self-contained `SKILL.md` file that teaches the agent how to per
 
 ## Skills
 
-- **[brave-browser-automation](.agents/skills/brave-browser-automation/SKILL.md)** — Automate Brave browser via Playwright CDP connection. Launch once, reconnect across multiple steps, keep browser alive.
+- **[chromium-browser-automation](.agents/skills/chromium-browser-automation/SKILL.md)** — Drive a visible Chromium-family browser (Chrome, Chromium, Brave, Edge, or Playwright Chromium) over CDP. Dedicated profile, one-action CLI verbs, session stays open across steps.
 
 ## Adding a Skill
 
@@ -17,10 +17,10 @@ Each skill is a self-contained `SKILL.md` file that teaches the agent how to per
 ## Structure
 
 ```
-.local-skills/
+local-skills/
 ├── README.md
 └── .agents/
     └── skills/
-        └── brave-browser-automation/
+        └── chromium-browser-automation/
             └── SKILL.md
 ```
