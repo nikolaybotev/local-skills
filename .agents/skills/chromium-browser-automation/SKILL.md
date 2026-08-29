@@ -21,6 +21,8 @@ bash "$SKILL_DIR/scripts/setup.sh"
 
 Creates `.venv` and installs the Playwright Python package if needed. Reuses the venv when `import playwright` already works.
 
+Requires **Python 3.14** on PATH (`python3.14`, or `python3` that reports 3.14). Other versions are not used. If 3.14 is missing, the script exits and tells the user how to install it (including `mise install` in this directory when mise is available). If `.venv` exists but its interpreter is dead or not 3.14, it is recreated.
+
 ### 2. Choose the engine (once per machine)
 
 If `"$PY" "$SKILL_DIR/scripts/configure_browser.py" --show` fails, **ask the user** which engine to use. Do not guess. Do not present this as a shell prompt — ask in the conversation.
