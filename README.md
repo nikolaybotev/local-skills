@@ -6,6 +6,7 @@ Each skill is a self-contained `SKILL.md` file that teaches the agent how to per
 
 ## Skills
 
+- **[ai-native-sdlc](.agents/skills/ai-native-sdlc/SKILL.md)** — A disciplined cycle for one person building software with an agent: bootstrap, spec and plan, independent review, then a subagent that merges each phase when CI is green. Proved on goldvalue. Includes starter `AGENTS.md` and `REVIEW.md` templates.
 - **[chromium-browser-automation](.agents/skills/chromium-browser-automation/SKILL.md)** — Drive a visible Chromium-family browser (Chrome, Chromium, Brave, Edge, or Playwright Chromium) over CDP. Dedicated profile, one-action CLI verbs, session stays open across steps.
 
 ## Adding a Skill
@@ -21,6 +22,10 @@ local-skills/
 ├── README.md
 └── .agents/
     └── skills/
+        ├── ai-native-sdlc/
+        │   ├── SKILL.md
+        │   ├── assets/
+        │   └── references/
         └── chromium-browser-automation/
             └── SKILL.md
 ```
