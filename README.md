@@ -1,8 +1,27 @@
 # Local Agent Skills
 
-Reusable skills for local AI agents (LM Studio Bionic, Claude Code, etc.).
+Reusable skills for local AI agents (LM Studio Bionic, Claude Code, Pi, OpenCode, Cursor, and others that read the Agent Skills layout).
 
 Each skill is a self-contained `SKILL.md` file that teaches the agent how to perform a specific automation task reliably.
+
+## Install
+
+Skills install into `~/.agents/skills`. A folder that is already there is skipped.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s
+```
+
+From a checkout of this repo, `./install.sh` installs that checkout instead of cloning.
+
+Pass another directory when an agent looks somewhere else. Pi and OpenCode read `~/.agents/skills`. Claude Code reads `~/.claude/skills`. Cursor on your machine reads both. A Cursor Cloud Agent reads `~/.cursor/skills` on its VM, and does not read `~/.agents/skills`.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s -- ~/.claude/skills
+curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s -- ~/.cursor/skills
+```
+
+The Cursor Cloud Agent environment install command is the `~/.cursor/skills` line. That puts the skills on the VM without cloning this repo next to the project.
 
 ## Skills
 
