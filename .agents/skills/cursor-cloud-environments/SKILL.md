@@ -34,19 +34,19 @@ python3 "$SKILL_DIR/scripts/environments.py" me
 
 If `me` fails, stop. Tell the user the worker key is not available. Do not create a key. Do not run `ps`, `env`, or `pgrep`, and do not quote a process listing. The worker command line contains the key, and copying it puts the key in the transcript.
 
-`me` returns `apiKeyName`. It looks like `cursor-agent-worker-ext-<hostname>-<pid>-<timestamp>` and matches a row on the Cursor API Keys page. Report that name when you use the key.
+`me` returns `data.apiKeyName`. It looks like `cursor-agent-worker-ext-<hostname>-<pid>-<timestamp>` and matches a row on the Cursor API Keys page. Report that name when you use the key.
 
 ## Procedure
 
 1. Run `me`.
-2. Before creating a personal environment, run `list --repo github.com/owner/name --owner personal`. A team environment is not that environment. If `data.items` has more than one id, stop and ask which one. Do not create and do not start a build. If it is empty, create. `list`, `get`, `history`, and `active` do not start a build.
+2. Before creating a personal environment, run `list --repo github.com/owner/name --owner personal`. A team environment is not that environment. If `data.items` has one id, keep it and do not create another. Continue at step 5 with that id. If it has more than one id, stop and ask which one. Do not create and do not start a build. If it is empty, go to step 3. `list`, `get`, `history`, and `active` do not start a build.
 3. Create only when the user asked to create the environment and the list was empty, or they asked for a distinct one. The script requires `--name`, `--repo`, and `--environment-json`. `--owner` defaults to `personal`. Repeat `--repo` for each repository. The JSON file uses the same schema as `.cursor/environment.json`.
 4. After create, run `history <id>`. Trust the history event with `"current": true` for the saved configuration. `get` can return `"environmentJson": null` even when that event holds the JSON. Do not deliver the environment yet. If `data.nextCursor` is set and no item has `"current": true`, run `history <id> --cursor <nextCursor>` before trusting the config.
 5. Primordial build. This applies only when the user asked to create the environment, or asked for a build. A new environment is not ready until a non-draft default-branch build has `SUCCEEDED`. Saving configuration may already have started that build, so `create` does not mean you should POST another one.
-   - Run `builds <id>` before any `build` POST, including immediately after create. Use `data.status`, `data.draft`, and `data.completedAt`. Ignore `draft: true` for this check. `draft: false` is the default-branch build. If `truncated` is true, stop and say the build list is incomplete. Do not start a build from that page.
-   - If any non-draft build is `IN_PROGRESS`, wait on the newest one. Do not POST another.
-   - If any non-draft build is `SUCCEEDED`, that is the primordial build. Do not POST another. Deliver it.
-   - If there is no non-draft build, or every non-draft build is `FAILED`, `CANCELLED`, or `SKIPPED`, POST `build <id>` with no flags. That is the required trigger. A long install is normal.
+   - Run `builds <id>` before any `build` POST, including immediately after create. Use `data.items[].status`, `data.items[].draft`, and `data.items[].completedAt`. `data.truncated` means the list is incomplete. Ignore `draft: true` for this check. `draft: false` is the default-branch build. If `data.truncated` is true, stop and say the build list is incomplete. Do not start a build from that page.
+   - If any non-draft build is `IN_PROGRESS`, wait on the newest one. Do not POST another. Do not deliver an older `SUCCEEDED` build while that one is still running.
+   - Otherwise, if any non-draft build is `SUCCEEDED`, that is the primordial build. Do not POST another. Deliver it.
+   - Otherwise, if there is no non-draft build, or every non-draft build is `FAILED`, `CANCELLED`, or `SKIPPED`, POST `build <id>` with no flags. That is the required trigger. A long install is normal.
    - On HTTP 503 or 429, do not POST again. Run `builds` again. If a non-draft `IN_PROGRESS` is there, wait on it. If none appeared, stop and report that. Do not keep retrying.
    - Poll `build-get` while `data.status` is `IN_PROGRESS`, about 45–60 seconds apart. Exit code 1 is expected. A 404 on the first reads is expected: retry that GET at most 3 times. If it is still 404, stop and report the build id. Do not POST again. `SUCCEEDED` is the only status that lets you deliver. `FAILED`, `CANCELLED`, and `SKIPPED` are finished and not ready: report `data.failure.type` and `data.failure.code`, leave the environment, and do not start another build unless the user asks.
    - `ok: true` and the top-level `status` are the HTTP call. An in-progress build is HTTP 200. `data.type` of `universal_image` from `active` means no successful environment build is in use.
