@@ -60,6 +60,6 @@ The create and update body field `environmentJson` is a JSON-encoded string of t
 }
 ```
 
-`dockerfile` is relative to `.cursor/`. `context` of `..` is the repo root. Do not `COPY` the project into the image. Install `git` and `sudo`. Set `USER` and `WORKDIR`. `install` must finish and be safe to run again. It runs while a build is prepared, not as a long-running server.
+`dockerfile` is relative to `.cursor/`. `context` of `..` is the repo root. Do not `COPY` the project into the image. Install `git`, `sudo`, `curl`, `ca-certificates`, `tar`, and `gzip`. The exec-daemon install runs `curl`; without it the build exits 127 (`curl: command not found`). `tar` and `gzip` unpack that download. Set `USER` and `WORKDIR`. `install` must finish and be safe to run again. It runs while a build is prepared, not as a long-running server.
 
 A build with no body uses each repo's default branch and, once it succeeds, is what new agents start from. That first successful non-draft build is the primordial build. Environment creation is not finished until `build-get` reports `SUCCEEDED` for it. A failed, cancelled, or skipped build does not count, and neither does `IN_PROGRESS`. A draft build is not used until someone activates it. This script does not activate drafts. Any requested ref other than the default branch has to be a draft.

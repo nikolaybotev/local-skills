@@ -21,6 +21,8 @@ A saved environment is the dashboard object Cursor-hosted agents run in. From a 
 
 A self-hosted run does not read `.cursor/environment.json`. Only Cursor-hosted agents use the saved environment.
 
+A custom image has to include `curl` and `ca-certificates`. The build installs the exec daemon with `curl`, and a missing `curl` fails that step with exit 127. Include `tar` and `gzip` as well so that download can be unpacked. `git` and `sudo` are required too.
+
 ## Script
 
 `SKILL_DIR` is the directory that contains this `SKILL.md`. Run the script. Do not reimplement key discovery in the shell. Its stdout is JSON. The key never appears there.
