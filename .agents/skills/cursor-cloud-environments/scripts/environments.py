@@ -159,9 +159,9 @@ def repo_filter(value):
             text = text[len(prefix) :]
     if text.startswith("git@"):
         text = text[4:].replace(":", "/", 1)
+    text = text.strip("/")
     if text.endswith(".git"):
         text = text[:-4]
-    text = text.strip("/")
     if text.startswith("www."):
         text = text[4:]
     if "/" not in text:
@@ -225,18 +225,43 @@ def cmd_get(secret, args):
 
 
 def cmd_history(secret, args):
+    query = [("limit", str(args.limit))]
+    if args.cursor:
+        query.append(("cursor", args.cursor))
     status, data = request(
         secret,
         "GET",
         f"/v1/environments/{args.id}/history",
-        [("limit", str(args.limit))],
+        query,
     )
     return emit(secret, status, data, status == 200)
 
 
 def cmd_builds(secret, args):
-    status, data = request(secret, "GET", f"/v1/environments/{args.id}/builds")
-    return emit(secret, status, data, status == 200)
+    query = [("limit", "100")]
+    items = []
+    seen = set()
+    cursor = None
+    pages = 0
+    while pages < 10:
+        page_query = list(query)
+        if cursor:
+            page_query.append(("cursor", cursor))
+        status, data = request(
+            secret, "GET", f"/v1/environments/{args.id}/builds", page_query
+        )
+        if status != 200:
+            return emit(secret, status, data, False)
+        for item in data.get("items") or []:
+            item_id = item.get("id")
+            if item_id not in seen:
+                seen.add(item_id)
+                items.append(item)
+        cursor = data.get("nextCursor")
+        pages += 1
+        if not cursor:
+            break
+    return emit(secret, 200, {"items": items, "truncated": bool(cursor)}, True)
 
 
 def cmd_build_get(secret, args):
@@ -282,9 +307,9 @@ def cmd_delete(secret, args):
 
 
 def cmd_build(secret, args):
-    body = None
     if args.ref and not args.draft:
         raise SystemExit("--ref requires --draft")
+    body = {}
     if args.draft or args.ref:
         body = {"draft": bool(args.draft)}
         if args.ref:
@@ -300,6 +325,8 @@ def cmd_build(secret, args):
     )
     if status == 503:
         eprint("503 upstream_error: do not retry; list builds before starting another.")
+    if status == 429:
+        eprint("429 rate_limit_exceeded: do not retry; list builds before starting another.")
     return emit(secret, status, data, status == 202)
 
 
@@ -320,6 +347,7 @@ def main():
     history_parser = sub.add_parser("history")
     history_parser.add_argument("id")
     history_parser.add_argument("--limit", type=int, default=20)
+    history_parser.add_argument("--cursor")
 
     builds_parser = sub.add_parser("builds")
     builds_parser.add_argument("id")

@@ -5,8 +5,9 @@ description: >-
   worker: list, create, update, delete, history, and builds. Use when the
   user asks to create or change a Cloud Agent environment, an environment
   build, or the dashboard environment for a repository, from a Cursor
-  self-hosted worker. Creating an environment always starts a build and
-  waits until that first build succeeds before the environment is delivered.
+  self-hosted worker. A new environment is not delivered until a non-draft
+  default-branch build has SUCCEEDED. Start that build only when one is
+  not already in progress.
   Uses the worker's existing API key. Do not create a new Cursor API key.
   Do not use this to edit only a repo's .cursor/environment.json, or for
   cursor-cloud MCP setup on a hosted run that already has a linked
@@ -31,29 +32,30 @@ A custom image has to include `curl` and `ca-certificates`. The build installs t
 python3 "$SKILL_DIR/scripts/environments.py" me
 ```
 
-If `me` fails, stop. Tell the user the worker key is not available. Do not create a key.
+If `me` fails, stop. Tell the user the worker key is not available. Do not create a key. Do not run `ps`, `env`, or `pgrep`, and do not quote a process listing. The worker command line contains the key, and copying it puts the key in the transcript.
 
 `me` returns `apiKeyName`. It looks like `cursor-agent-worker-ext-<hostname>-<pid>-<timestamp>` and matches a row on the Cursor API Keys page. Report that name when you use the key.
 
 ## Procedure
 
 1. Run `me`.
-2. Before creating, run `list --repo github.com/owner/name`. If an environment for that repo already exists, keep that id and do not create another unless the user asked for a distinct one. Do not tell the user it is ready yet. Continue with the primordial build.
-3. Create only when the user asked to create the environment. `--owner` defaults to `personal`. Pass one `--repo` per repository and `--environment-json` as a path to a JSON object. The file uses the same schema as `.cursor/environment.json`.
-4. After create, run `history <id>`. Trust the history event with `"current": true` for the saved configuration. `get` can return `"environmentJson": null` even when that event holds the JSON. Do not deliver the environment yet.
-5. Tell the user a personal environment overrides a committed `.cursor/environment.json` for them. The API stores a copy. It does not set `repoFile`, so later edits to the file in git do not change this environment. Say that when it matters. This is part of the final report, not permission to stop before the build.
-6. Primordial build. Creating an environment from config includes its first build. Before you tell the user the environment is ready, a non-draft build of the default branch must have `SUCCEEDED`.
-   - If `list` found an existing environment, run `builds <id>` first. A `SUCCEEDED` non-draft build already satisfies this. An `IN_PROGRESS` build is the one you wait on. Do not start a second. If every build failed, was cancelled, or was skipped, or there is no build, start one.
-   - Otherwise run `build <id>` with no flags. That builds every repo's default branch. A long install is normal.
-   - On HTTP 503, do not retry the POST. Run `builds <id>`. If a build appeared, wait on that one.
-   - Poll `build-get <id> <buildId>` until status is `SUCCEEDED`, `FAILED`, `CANCELLED`, or `SKIPPED`. The first read can be `404`; retry the GET, not the POST. Wait about 45–60 seconds between reads. Do not treat `create` or `IN_PROGRESS` as success. `active` returning a universal image means no successful environment build is in use yet.
-   - Deliver the environment only after `SUCCEEDED`. Include the build id, status, and completed time.
-   - If that build fails, do not call the environment ready and do not start another build unless the user asks. Report `failure.type`, `failure.code`, and any message. Leave the environment in place.
-7. A build the user asked for outside of creation uses the same wait. Pass `--draft` when agents must not pick it up yet. Any `--ref` requires `--draft` (`--ref repo=branch`, repeatable).
-8. Update with `update <id> --environment-json <path>` or `--name`. Delete only when the user named the environment and told you to delete it. `delete` refuses to run without `--yes`. An update does not itself start the primordial build.
+2. Before creating a personal environment, run `list --repo github.com/owner/name --owner personal`. A team environment is not that environment. If `data.items` has more than one id, stop and ask which one. Do not create and do not start a build. If it is empty, create. `list`, `get`, `history`, and `active` do not start a build.
+3. Create only when the user asked to create the environment and the list was empty, or they asked for a distinct one. The script requires `--name`, `--repo`, and `--environment-json`. `--owner` defaults to `personal`. Repeat `--repo` for each repository. The JSON file uses the same schema as `.cursor/environment.json`.
+4. After create, run `history <id>`. Trust the history event with `"current": true` for the saved configuration. `get` can return `"environmentJson": null` even when that event holds the JSON. Do not deliver the environment yet. If `data.nextCursor` is set and no item has `"current": true`, run `history <id> --cursor <nextCursor>` before trusting the config.
+5. Primordial build. This applies only when the user asked to create the environment, or asked for a build. A new environment is not ready until a non-draft default-branch build has `SUCCEEDED`. Saving configuration may already have started that build, so `create` does not mean you should POST another one.
+   - Run `builds <id>` before any `build` POST, including immediately after create. Use `data.status`, `data.draft`, and `data.completedAt`. Ignore `draft: true` for this check. `draft: false` is the default-branch build. If `truncated` is true, stop and say the build list is incomplete. Do not start a build from that page.
+   - If any non-draft build is `IN_PROGRESS`, wait on the newest one. Do not POST another.
+   - If any non-draft build is `SUCCEEDED`, that is the primordial build. Do not POST another. Deliver it.
+   - If there is no non-draft build, or every non-draft build is `FAILED`, `CANCELLED`, or `SKIPPED`, POST `build <id>` with no flags. That is the required trigger. A long install is normal.
+   - On HTTP 503 or 429, do not POST again. Run `builds` again. If a non-draft `IN_PROGRESS` is there, wait on it. If none appeared, stop and report that. Do not keep retrying.
+   - Poll `build-get` while `data.status` is `IN_PROGRESS`, about 45–60 seconds apart. Exit code 1 is expected. A 404 on the first reads is expected: retry that GET at most 3 times. If it is still 404, stop and report the build id. Do not POST again. `SUCCEEDED` is the only status that lets you deliver. `FAILED`, `CANCELLED`, and `SKIPPED` are finished and not ready: report `data.failure.type` and `data.failure.code`, leave the environment, and do not start another build unless the user asks.
+   - `ok: true` and the top-level `status` are the HTTP call. An in-progress build is HTTP 200. `data.type` of `universal_image` from `active` means no successful environment build is in use.
+   - If you have to end the turn while `data.status` is still `IN_PROGRESS`, report the build id and that it is still running. Do not call the environment ready and do not start a second build.
+6. A build the user asked for outside of creation uses the same wait. Pass `--draft` when agents must not pick it up yet. Any `--ref` requires `--draft` (`--ref repo=branch`, repeatable). Wait until that build's `data.status` is terminal. A draft `SUCCEEDED` does not make the environment ready and does not satisfy the primordial check. Do not activate drafts.
+7. Update with `update <id> --name` or `--environment-json <path>`. A name-only update does not need a build. After `--environment-json`, run `builds` before posting. Saving that config can start a configuration-change build. If a non-draft build is already `IN_PROGRESS`, wait on it when the user asked for a build. Do not POST a second one. An update is not delivery. Delete only when the user named the environment and told you to delete it. `delete` refuses to run without `--yes`.
 
 Read [references/api.md](references/api.md) when a call returns an error, or when the configuration itself is in question.
 
 ## Report
 
-After creation, deliver the environment only when the primordial build succeeded. Give the environment id, name, owner, repository URLs, build id, status, and completed time. If the build failed, give those same fields plus the failure, and say it is not ready. Leave the API key out. When you report an API timestamp, convert it to the user's zone.
+After creation, deliver the environment only when the primordial build succeeded. Give the environment id, name, owner, repository URLs, build id, status, and completed time. A personal environment overrides a committed `.cursor/environment.json` for that user. The API stores a copy and does not set `repoFile`, so later edits to the file in git do not change this environment. If the build failed, give those same fields plus `failure.type` and `failure.code`, and say it is not ready. Leave the API key out. When you report an API timestamp, convert it to the user's zone.
