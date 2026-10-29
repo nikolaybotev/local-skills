@@ -28,7 +28,7 @@ The Cursor Cloud Agent environment install command is the `~/.cursor/skills` lin
 - **[ai-native-sdlc](.agents/skills/ai-native-sdlc/SKILL.md)** — A disciplined cycle for one person building software with an agent: bootstrap, spec and plan, independent review, then a subagent that merges each phase when CI is green. Proved on goldvalue. Includes starter `AGENTS.md` and `REVIEW.md` templates.
 - **[canvas-pdf](.agents/skills/canvas-pdf/SKILL.md)** — Print a Cursor canvas to a PDF that matches the canvas on screen. The canvas is not a localhost site. Rebuild it as HTML and print with Playwright Chromium.
 - **[chromium-browser-automation](.agents/skills/chromium-browser-automation/SKILL.md)** — Drive a visible Chromium-family browser (Chrome, Chromium, Brave, Edge, or Playwright Chromium) over CDP. Dedicated profile, one-action CLI verbs, session stays open across steps.
-- **[cursor-cloud-environments](.agents/skills/cursor-cloud-environments/SKILL.md)** — From a Cursor self-hosted My Machines worker, list, create, update, delete, and inspect history and builds of saved Cloud Agent environments with the worker's existing API key. A new environment is handed back only after a non-draft default-branch build has succeeded, and only if one was not already in progress.
+- **[cursor-cloud-environments](.agents/skills/cursor-cloud-environments/SKILL.md)** — From a Cursor self-hosted My Machines worker, list, create, update, delete, and inspect history and builds of saved Cloud Agent environments with the worker's existing API key. A new environment is not delivered until a non-draft default-branch build has succeeded. Start that build only when one is not already in progress.
 
 ## Adding a Skill
 
