@@ -33,7 +33,7 @@ Review model: Grok 4.7 High (D12). Phase 0 and Phase 1 model: Composer 2.5. Do n
 - One phase, one pull request, into `main`. The body lists the plan steps done and the definition-of-done evidence.
 - Do not execute `install.sh` or `.cursor/install.sh` on the machine that builds the phase. Do not install skills onto a machine. The `install-smoke` job is the first run of those scripts, on the GitHub runner.
 - Do not create rulesets, add required checks, dispatch workflows, cancel runs, or list secrets.
-- Squash-merge only when the pull request has no failing checks, never with an admin override (D8). Delete-branch-on-merge is already on; do not force-push.
+- Squash-merge only when `shellcheck`, `install-smoke`, and `skill-frontmatter` have succeeded, never with an admin override (D8). Merging this draft, or a docs-only pull request, before that workflow is on the branch does not meet the rule. Delete-branch-on-merge is already on; do not force-push.
 - Where this plan and the spec disagree, the spec wins. Record the discrepancy here. A phase that has not landed has no build notes.
 
 ## Acceptance-criteria coverage
