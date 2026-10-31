@@ -39,7 +39,7 @@ None. The repo and the prompt settle the design. [spec.md](spec.md) records the 
 
 ## Original prompt (redacted)
 
-> Bootstrap a Cursor Project for github.com/nikolaybotev/local-skills. Onboard per the ai-native-sdlc skill: write `AGENTS.md`, `REVIEW.md`, and a README update if needed; add `.github/workflows/test.yml` with shellcheck, an install smoke test into a temporary `HOME`, and SKILL.md frontmatter validation; work through spec, plan, fresh-context review, then build one phase per pull request. Squash-merge only when checks are green. Keep skills and docs generic, not written for one machine.
+> Bootstrap a Cursor Project for this repo. Onboard per the ai-native-sdlc skill: write `AGENTS.md`, `REVIEW.md`, and a README update if needed; add `.github/workflows/test.yml` with shellcheck, an install smoke test into a temporary `HOME`, and SKILL.md frontmatter validation; work through spec, plan, fresh-context review, then build one phase per pull request. Squash-merge only when checks are green. Keep skills and docs generic, not written for one machine.
 >
 > **Already done.** Commit d006fc6 added `.cursor/environment.json`, `.cursor/install.sh`, and `.cursor/start.sh`. The repo is public. Merge is squash only, with delete branch on merge. Protected `main` requires pull requests, squash merge, signed commits, and linear history.
 >

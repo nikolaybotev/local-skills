@@ -8,6 +8,14 @@ Run three passes and tag each finding with its pass:
 - **Security:** secrets, API keys, or key material in the repo or in instructions that print them. Reimplementing worker-key discovery with `ps`, `env`, or `pgrep`. An install or smoke test whose destination is outside a temporary directory. A network fetch from the product installer or from CI beyond checking out the repo and installing `shellcheck`.
 - **Compliance:** the change matches `intent/<change>/spec.md` and `plan.md`, and the conventions in `AGENTS.md`. A departure from the plan that is not written back into `plan.md` in the same change is a compliance finding. Skills and docs stay generic. Historical `intent/` folders stay untouched. Historical onboarding did not change skill behavior. This change may edit `.agents/skills/cursor-cloud-environments/SKILL.md` and `.agents/skills/cursor-cloud-environments/references/api.md` only, as `intent/config-as-code/spec.md` requires. No other path under `.agents/skills/` changes. The workflow, once present, keeps the jobs `shellcheck`, `install-smoke`, and `skill-frontmatter`, does not add CodeQL, and does not add `workflow_dispatch`.
 
+## Builder writing
+
+Tag these under **Compliance** unless they would break the product; then use **Important** under Bugs.
+
+- **Self-reference:** prose, scripts, or workflows hardcode this repo's owner, name, or URL instead of "this repo" or a derived identifier (`git remote`, `GITHUB_REPOSITORY`, or the Actions `github.repository` context). References to other repos are fine.
+- **Variable config:** docs, tests, or workflows embed a literal value where the design names a setting (env var, secret, or config key). Tests check the configured value, not a literal.
+- **Obvious notes (human-facing docs only):** in README, user docs, or setup docs, parentheticals or asides that restate what the reader already knows (for example that a successful command exits zero). Do not flag explicit expectations in agent-facing files (`AGENTS.md`, `REVIEW.md`, skills, intents for agents); those notes stay.
+
 ## What Important means here
 
 Reserve **Important** for a broken installer contract, a leaked secret, the browser skill on a daily profile, or a change the spec forbids. Style and naming are nits.
