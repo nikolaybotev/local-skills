@@ -66,9 +66,16 @@ Four kinds of check:
 - **End-to-end.** The whole feature through its real interfaces as deployed, nothing faked between the two ends.
 - **Live check.** A quick check of one real installed deployment in place, by hand or from a routine. It is not a test suite.
 
-End-to-end is a convention, not a precise term. Whenever a test, pull request, or review calls something end-to-end, state its two ends. A good default for the ends is wherever a real user or outside system touches the feature: in through the real interface, out to the real effect. Scope the ends to the feature under test. For example, for a config hot-reload feature the ends are a real config edit and the installed service logging the reload with the same process ID, not what the service does afterwards.
+| Type | What it is | What it covers | Hot-reload example |
+| --- | --- | --- | --- |
+| Unit | One piece in isolation, everything around it faked | The logic of a single function or module | A config-reload unit test calls the config library directly and checks that a valid change applies and a bad one is rejected |
+| Integration | Real pieces working together, the far end faked | How components fit together inside a real process | A script runs the real watcher service, swaps in an invalid config, then a group-readable (0644) one, then a valid one for a second folder, and checks notifications at a fake webhook receiver |
+| End-to-end | The whole system as a user meets it, nothing faked between the two ends | The feature through its real interfaces, as deployed | With the signed service installed and running under launchd, edit the real config with a real change, then check its log for the reload line and that the process ID didn't change |
+| Live check | A quick check of the real installed system in place | That this deployment works right now | On a live deployment, set the config to mode 0610, see the rejection logged with the same process ID, then set it back to 0600 |
 
 If anything between the two ends is faked, it is integration, not end-to-end.
+
+End-to-end is a convention, not a precise term. Whenever a test, pull request, or review calls something end-to-end, state its two ends. A good default for the ends is wherever a real user or outside system touches the feature: in through the real interface, out to the real effect. Scope the ends to the feature under test. For example, for a config hot-reload feature the ends are a real config edit and the installed service logging the reload with the same process ID, not what the service does afterwards.
 
 Keep many unit tests, fewer integration tests, and only a few end-to-end ones, because bigger tests are slower, more fragile, and harder to pin down when they fail.
 
