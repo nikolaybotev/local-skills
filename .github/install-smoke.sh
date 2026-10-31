@@ -43,16 +43,29 @@ for dir in .agents/skills/*/; do
   first_name=$(basename "$dir")
   break
 done
-canary="$dest/$first_name/canary-smoke"
-echo canary >"$canary"
+
+echo tampered >"$dest/$first_name/SKILL.md"
+mkdir -p "$dest/stale-smoke-skill"
+echo stale >"$dest/stale-smoke-skill/SKILL.md"
+mkdir -p "$dest/unrelated-smoke-dir"
+echo keep >"$dest/unrelated-smoke-dir/note.txt"
+
 output=$(HOME="$home1" ./install.sh "$dest" 2>&1)
+echo "$output" | grep -q "updated $first_name"
+cmp -s "$dest/$first_name/SKILL.md" ".agents/skills/$first_name/SKILL.md"
+test ! -e "$dest/stale-smoke-skill"
+echo "$output" | grep -q "removed stale-smoke-skill"
+test "$(cat "$dest/unrelated-smoke-dir/note.txt")" = "keep"
+
+output2=$(HOME="$home1" ./install.sh "$dest" 2>&1)
 for dir in .agents/skills/*/; do
   [ -d "$dir" ] || continue
   [ -f "$dir/SKILL.md" ] || continue
   name=$(basename "$dir")
-  echo "$output" | grep -q "skip $name"
+  echo "$output2" | grep -q "updated $name"
 done
-test "$(cat "$canary")" = "canary"
+test ! -e "$dest/stale-smoke-skill"
+test "$(cat "$dest/unrelated-smoke-dir/note.txt")" = "keep"
 
 home2=$(mktemp -d)
 HOME="$home2" ./install.sh
