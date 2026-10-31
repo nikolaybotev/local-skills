@@ -26,6 +26,10 @@ A disciplined way for one person to build software with an agent. Each stage end
 
 A later idea starts again at 1 in a new `intent/<change>/`. The sections below are the detail for these four. Do not treat this list as a second procedure.
 
+## Small intent
+
+When an intent arrives already labeled `small intent`, every thread for that intent uses Composer 2.5: spec, plan, build, and all review threads. Otherwise the SDLC is unchanged. One process. Do not skip steps.
+
 Read [references/templates.md](references/templates.md) when writing the three files. Copy [assets/AGENTS.md](assets/AGENTS.md) and [assets/REVIEW.md](assets/REVIEW.md) only when those files are missing, then fill every placeholder from this repo. For build and build-review, load and follow the installed **build-practices** skill; do not paste its text into product repos. Read [references/goldvalue.md](references/goldvalue.md) for the committed shape of that one run.
 
 ## File names to use
@@ -77,20 +81,20 @@ The spec wins over the plan. If the plan is the one that is right, change the sp
 
 They asked "are we at the build gate?" The answer in that session was: the gate is their approval of `plan.md`.
 
-They then asked for the last scrutiny before opening it, in this order:
+They then asked for the last scrutiny before opening it, in this order. When the intent is labeled `small intent`, run every fresh-context subagent in this section on Composer 2.5.
 
 1. A fresh-context subagent reads `spec.md` against `intent.md` and flags what is unclear, missing, or in conflict. It does not edit.
 2. You apply the findings you agree with, and you re-check any external fact the review disputes.
 3. A fresh-context subagent does the same for `plan.md` against the spec.
 4. You apply those findings the same way.
 5. Stop only if something demands their attention. They said that in those words. The LBMA license was that stop: publishing the prices was not a decision to bury in a draft. It was written up as a gate in the plan, they resolved it, and the resolution was committed into the spec and the plan before Phase 0.
-6. When they say to build, a fresh-context subagent implements the plan. They named the model (Claude Sonnet). If they name one, use it.
+6. When they say to build, a fresh-context subagent implements the plan. When the intent is labeled `small intent`, use Composer 2.5. Otherwise, if they name a model, use it (that session used Claude Sonnet).
 
 Do not run a second session against the same files. Two writers edited `spec.md` at once in that chat, and one had to stand down.
 
 ## Build
 
-Hand a fresh-context subagent a chunk of the plan, not the design chat. Goldvalue sent Phases 0–2 together, then 3a–3c, then 4a–5, then 6a–6c. Use the session's default model unless they name one. They named Claude Sonnet for the build, and the parent did not substitute another model when that launch failed. It stopped and asked.
+Hand a fresh-context subagent a chunk of the plan, not the design chat. Goldvalue sent Phases 0–2 together, then 3a–3c, then 4a–5, then 6a–6c. When the intent is labeled `small intent`, use Composer 2.5 for every build-thread subagent. Otherwise use the session's default model unless they name one. They named Claude Sonnet for the build in that session, and the parent did not substitute another model when that launch failed. It stopped and asked.
 
 The subagent works on its own. The prompt it was given:
 
