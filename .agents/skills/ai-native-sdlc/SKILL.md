@@ -28,9 +28,9 @@ A later idea starts again at 1 in a new `intent/<change>/`. The sections below a
 
 ## Small intent
 
-When an intent arrives already labeled `small intent`, every thread for that intent uses Composer 2.5: spec, plan, build, and all review threads. Otherwise the SDLC is unchanged. One process. Do not skip steps.
+When an intent arrives already labeled `small intent`, every thread for that intent uses Composer 2.5: spec, plan, build, and all review threads. Do not substitute another model; if Composer 2.5 cannot be launched, stop and ask. Otherwise the SDLC is unchanged. One process. Do not skip steps.
 
-Read [references/templates.md](references/templates.md) when writing the three files. Copy [assets/AGENTS.md](assets/AGENTS.md) and [assets/REVIEW.md](assets/REVIEW.md) only when those files are missing, then fill every placeholder from this repo. For build and build-review, load and follow the installed **build-practices** skill; do not paste its text into product repos. Read [references/goldvalue.md](references/goldvalue.md) for the committed shape of that one run.
+Read [references/templates.md](references/templates.md) when writing the three files. Copy [assets/AGENTS.md](assets/AGENTS.md) and [assets/REVIEW.md](assets/REVIEW.md) only when those files are missing, then fill every placeholder from this repo. For build and build-review, load and follow the installed **build-practices** skill; do not paste its text into product repos. When the intent is labeled `small intent`, run every build and build-review thread on Composer 2.5. Read [references/goldvalue.md](references/goldvalue.md) for the committed shape of that one run.
 
 ## File names to use
 
@@ -60,7 +60,7 @@ A skill that ships with the product lives in `.agents/skills/<name>/`. If it sho
 
 ## Prompt to first commit
 
-Goldvalue's product prompt mixed the idea with design questions and asked for four things at once: record the prompt in `intent.md`, draft `spec.md`, draft `plan.md`, and iterate the spec and the plan together because the prompt was already both. Then create the repo, put it on GitHub, commit the draft.
+Goldvalue's product prompt mixed the idea with design questions and asked for four things at once: record the prompt in `intent.md`, draft `spec.md`, draft `plan.md`, and iterate the spec and the plan together because the prompt was already both. Then create the repo, put it on GitHub, commit the draft. When the intent is labeled `small intent`, run bootstrap drafting on Composer 2.5 too.
 
 1. Write `intent/<slug>/intent.md`. Their prompt goes under "Original prompt" verbatim. If the idea came from an earlier chat, paste that exchange under "Source transcript" and keep interpretation out of that section. goldvalue's v1.2 did this.
 2. Draft `spec.md` and `plan.md` in the same session. Answer a design question when you can check it. Leave it open in the spec when you cannot. Number the answers you do make (`D1`, `D2`, …), with the reasoning, so a later phase does not re-litigate them.
@@ -70,6 +70,8 @@ Goldvalue's product prompt mixed the idea with design questions and asked for fo
 6. `AGENTS.md` is commands, conventions, architecture, and things agents get wrong, short enough to read at the start of a session. Specialize `REVIEW.md` to this product before the first pull request. Goldvalue's Bugs and Important lines name a wrong gold value and a broken CSV contract. Write the equivalent for this repo.
 
 ## Iterate in the chat
+
+When the intent is labeled `small intent`, run every spec-and-plan thread on Composer 2.5 (see [Small intent](#small-intent)).
 
 They correct you in conversation. Write the correction into the spec or the plan and commit the draft. Goldvalue went through several numbered drafts this way (Preact, sheet-wide currency, the parity table, DEM, CSV) while an open question stayed open until it was answered.
 
