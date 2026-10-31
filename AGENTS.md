@@ -33,7 +33,7 @@ Merge rules for this repo: pull request only, squash merge, signed commits, line
 
 - Do not run `install.sh` or `.cursor/install.sh` against a real `$HOME`. An explicit destination applies only to `install.sh`. `.cursor/install.sh` takes no destination. It always runs the root installer into `${HOME}/.cursor/skills-cursor`. For `.cursor/install.sh`, the only safe use is a temporary `HOME`. The default destination of `install.sh` is `$HOME/.agents/skills`.
 - `install.sh` leaves an existing skill directory untouched. A skip is not an update.
-- A piped install runs `git clone --depth 1` with no branch, so it clones the default branch (today `main`), when the script is not a file beside `.agents/skills`. A checkout installs that checkout. Do not expect a pipe to carry a branch.
+- A piped install runs `git clone --depth 1` with no branch, so it clones the default branch (today `main`), when the script is not a file beside `.agents/skills`. A checkout installs that checkout. Do not expect a pipe to carry a branch. Set `LOCAL_SKILLS_REPO_URL` or `GITHUB_REPOSITORY` when the script is piped and there is no checkout.
 - The installer ignores a directory under `.agents/skills/` that has no `SKILL.md`. Do not add a skill folder without that file.
 - The copy excludes `.cache`, `.venv`, `.git`, and `__pycache__`. Do not commit those, and do not expect them after install.
 - Cloud Agent skills for this repo go to `~/.cursor/skills-cursor`. `.cursor/install.sh` is the installer `.cursor/environment.json` runs. Do not document or implement `~/.cursor/skills` as that path.

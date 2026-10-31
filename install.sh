@@ -6,11 +6,10 @@ set -eu
 #
 #   ./install.sh
 #   ./install.sh ~/.cursor/skills
-#   curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s
-#   curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s -- ~/.cursor/skills
+#   GITHUB_REPOSITORY=owner/repo curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/install.sh" | sh -s
+#   GITHUB_REPOSITORY=owner/repo curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/install.sh" | sh -s -- ~/.cursor/skills
 
 dest="${1:-$HOME/.agents/skills}"
-repo_url="https://github.com/nikolaybotev/local-skills.git"
 tmp=""
 
 cleanup() {
@@ -45,6 +44,14 @@ if [ -f "$0" ]; then
 fi
 
 if [ -z "$src" ]; then
+  repo_url="${LOCAL_SKILLS_REPO_URL:-}"
+  if [ -z "$repo_url" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+    repo_url="https://github.com/${GITHUB_REPOSITORY}.git"
+  fi
+  if [ -z "$repo_url" ]; then
+    echo "error: set LOCAL_SKILLS_REPO_URL or GITHUB_REPOSITORY, or run install.sh from a checkout." >&2
+    exit 1
+  fi
   if ! command -v git >/dev/null 2>&1; then
     echo "error: git is required to download the skills." >&2
     exit 1
