@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Author | Nikolay Botev |
 | Captured | 2026-10-30 |
 | Status | Draft |
 | Stage | 1 · Plan |
@@ -40,9 +39,9 @@ None. The repo and the prompt settle the design. [spec.md](spec.md) records the 
 
 ## Original prompt (verbatim)
 
-> Welcome. You're the new Cursor Project for github.com/nikolaybotev/local-skills, which Nikolay Botev owns. I'm <assistant>, the assistant that bootstraps his repos and relays between his Projects.
+> Welcome. You're the new Cursor Project for github.com/nikolaybotev/local-skills, which the owner owns. I'm <assistant>, the assistant that bootstraps his repos and relays between his Projects.
 >
-> **What this repo is.** Shared agent skills in `.agents/skills/` (ai-native-sdlc, canvas-pdf, chromium-browser-automation, cursor-cloud-environments), plus a root `install.sh`. Cloud agent environments run that installer to put the skills into `~/.cursor/skills-cursor`. Nikolay's agents depend on these skills, so a broken skill or installer breaks every repo that installs them.
+> **What this repo is.** Shared agent skills in `.agents/skills/` (ai-native-sdlc, canvas-pdf, chromium-browser-automation, cursor-cloud-environments), plus a root `install.sh`. Cloud agent environments run that installer to put the skills into `~/.cursor/skills-cursor`. The owner's agents depend on these skills, so a broken skill or installer breaks every repo that installs them.
 >
 > **Already done.** Commit d006fc6 added `.cursor/environment.json`, `.cursor/install.sh` (installs this checkout's own skills) and `.cursor/start.sh`. The repo is public. Merge is squash only, with delete branch on merge. The `main branch protection` ruleset requires a PR, squash only, signed commits and linear history, with no bypass. All changes go through PRs from here on.
 >
@@ -52,12 +51,12 @@ None. The repo and the prompt settle the design. [spec.md](spec.md) records the 
 >
 > **Your first real task, after onboarding.** Update the cursor-cloud-environments skill to say that it covers inline-config environments created through the API (`POST /v1/environments`), which only snapshot the config and don't follow the repo file. The Config as code route is the other one. When a repo has a committed `.cursor/environment.json` and no saved environment, launching a cloud agent or Project on it without naming an environment makes Cursor create one that follows the file. The skill should point to that as the preferred path for new repos.
 >
-> **Admin changes.** Your token can't create rulesets, add required checks, run `workflow_dispatch`, cancel runs or list secrets. By default, start a thread on Nikolay's self-hosted worker (<assistant>'s `<home>/git` workspace), which has `gh` as Nikolay, and have it report the settings back as the API reads them. Once your CI merges, do that to add its job names as required status checks (strict). If the first start asks for access approval, that's Nikolay's click. Tell me and I'll let him know. His fallback is the GitHub UI.
+> **Admin changes.** Your token can't create rulesets, add required checks, run `workflow_dispatch`, cancel runs or list secrets. By default, start a thread on the owner's self-hosted worker (<assistant>'s `<home>/git` workspace), which has `gh` as the owner, and have it report the settings back as the API reads them. Once your CI merges, do that to add its job names as required status checks (strict). If the first start asks for access approval, that's the owner's click. Tell me and I'll let him know. His fallback is the GitHub UI.
 >
-> **Deploying to <assistant>.** A merged skill change takes effect on <assistant> only after `git pull` plus the root `install.sh` in `<home>/git/local-skills`. Never run that, or install anything else on Nikolay's machines, without his approval, which I'll relay. Ask me first.
+> **Deploying to <assistant>.** A merged skill change takes effect on <assistant> only after `git pull` plus the root `install.sh` in `<home>/git/local-skills`. Never run that, or install anything else on the owner's machines, without his approval, which I'll relay. Ask me first.
 >
 > **Standing limits.**
 > - Use only Cursor's own models: Grok 4.7 High for coordination, spec, plan and review, and Composer 2.5 for build.
 > - Never handle secrets or key material.
-> - Commits made on <assistant> are signed with Nikolay's GPG key. Test signing with `timeout 20 gpg --batch --local-user <key> --sign --output /dev/null <<< "sign-check"`. Never use `--pinentry-mode error` or `--no-gpg-sign`. If signing fails, stop and ask.
+> - Commits made on <assistant> are signed with the owner's GPG key. Test signing with `timeout 20 gpg --batch --local-user <key> --sign --output /dev/null <<< "sign-check"`. Never use `--pinentry-mode error` or `--no-gpg-sign`. If signing fails, stop and ask.
 > - Report milestones and merged PRs to me briefly.
