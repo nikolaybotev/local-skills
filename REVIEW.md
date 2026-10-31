@@ -8,7 +8,7 @@ Run three passes and tag each finding with its pass:
 - **Security:** secrets, API keys, or key material in the repo or in instructions that print them. Reimplementing worker-key discovery with `ps`, `env`, or `pgrep`. An install or smoke test whose destination is outside a temporary directory. A network fetch from the product installer or from CI beyond checking out the repo and installing `shellcheck`.
 - **Compliance:** the change matches `intent/<change>/spec.md` and `plan.md`, and the conventions in `AGENTS.md`. A departure from the plan that is not written back into `plan.md` in the same change is a compliance finding. Skills and docs stay generic. Historical `intent/` folders stay untouched. Historical onboarding did not change skill behavior. This change may edit `.agents/skills/cursor-cloud-environments/SKILL.md` and `.agents/skills/cursor-cloud-environments/references/api.md` only, as `intent/config-as-code/spec.md` requires. No other path under `.agents/skills/` changes. The workflow, once present, keeps the jobs `shellcheck`, `install-smoke`, and `skill-frontmatter`, does not add CodeQL, and does not add `workflow_dispatch`.
 
-Also apply [BUILD_PRACTICES.md](.agents/skills/ai-native-sdlc/BUILD_PRACTICES.md) from the installed ai-native-sdlc skill when reviewing build pull requests.
+Also apply the installed **build-practices** skill when reviewing build pull requests.
 
 ## What Important means here
 

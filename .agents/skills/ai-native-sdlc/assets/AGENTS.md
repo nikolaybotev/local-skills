@@ -14,6 +14,7 @@
 ## Conventions
 
 - Docs follow the solo AI-native SDLC chain: `intent/<change>/intent.md` → `spec.md` → `plan.md`. Update `plan.md` in the same commit when implementation departs from it.
+- For build and build-review, load and follow the installed **build-practices** skill; do not copy its text into this repo.
 - <Rules that are easy to violate in this repo.>
 
 ## Architecture

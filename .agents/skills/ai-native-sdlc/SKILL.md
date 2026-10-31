@@ -26,7 +26,7 @@ A disciplined way for one person to build software with an agent. Each stage end
 
 A later idea starts again at 1 in a new `intent/<change>/`. The sections below are the detail for these four. Do not treat this list as a second procedure.
 
-Read [references/templates.md](references/templates.md) when writing the three files. Copy [assets/AGENTS.md](assets/AGENTS.md) and [assets/REVIEW.md](assets/REVIEW.md) only when those files are missing, then fill every placeholder from this repo. For build and build-review, read [BUILD_PRACTICES.md](BUILD_PRACTICES.md); install the skill and point at it—do not paste the full text into product repos. Read [references/goldvalue.md](references/goldvalue.md) for the committed shape of that one run.
+Read [references/templates.md](references/templates.md) when writing the three files. Copy [assets/AGENTS.md](assets/AGENTS.md) and [assets/REVIEW.md](assets/REVIEW.md) only when those files are missing, then fill every placeholder from this repo. For build and build-review, load and follow the installed **build-practices** skill; do not paste its text into product repos. Read [references/goldvalue.md](references/goldvalue.md) for the committed shape of that one run.
 
 ## File names to use
 
@@ -71,7 +71,7 @@ They correct you in conversation. Write the correction into the spec or the plan
 
 If two requirements contradict, split a first release from a later one and tag the later items. The spec did that for multi-currency.
 
-The spec wins over the plan. If the plan is the one that is right, change the spec first. During build, follow [BUILD_PRACTICES.md](BUILD_PRACTICES.md) for departures recorded in `plan.md`.
+The spec wins over the plan. If the plan is the one that is right, change the spec first. During build, follow the installed **build-practices** skill for departures recorded in `plan.md`.
 
 ## Last scrutiny, then the build
 
@@ -94,8 +94,8 @@ Hand a fresh-context subagent a chunk of the plan, not the design chat. Goldvalu
 
 The subagent works on its own. The prompt it was given:
 
-- Read `AGENTS.md`, `REVIEW.md`, [BUILD_PRACTICES.md](BUILD_PRACTICES.md), the spec, and the plan, including deviations already recorded in `plan.md`.
-- Follow [BUILD_PRACTICES.md](BUILD_PRACTICES.md); use this repo's `AGENTS.md` for commands and the required check names for merge.
+- Read `AGENTS.md`, `REVIEW.md`, load and follow the **build-practices** skill, the spec, and the plan, including deviations already recorded in `plan.md`.
+- Follow the **build-practices** skill; use this repo's `AGENTS.md` for commands and the required check names for merge.
 - Do not ask questions. If something is undecidable, make the most conservative choice consistent with the spec, note it in `plan.md` under the phase, and continue.
 - Each pull request body lists the plan steps done and the definition-of-done evidence.
 - Update `AGENTS.md` as commands and conventions land.

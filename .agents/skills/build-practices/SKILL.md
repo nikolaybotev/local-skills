@@ -1,3 +1,13 @@
+---
+name: build-practices
+description: >-
+  Shared rules for implementing code and docs in pull requests and for
+  reviewing build pull requests in any repo: writing rules, git workflow,
+  merge gate, spec vs plan during build, Cursor Cloud install script, layout,
+  and repository admin limits. Load and follow this skill during SDLC build
+  phases and when reviewing changes that land through pull requests.
+---
+
 # Build practices
 
 Rules for implementing code, updating docs in pull requests, and reviewing those changes. Each product repo keeps commands and product-specific review risks in root `AGENTS.md` and `REVIEW.md`.
@@ -41,7 +51,7 @@ The published root `install.sh` in the skills repo is separate: a piped run defa
 ## Build execution
 
 - Before build, fresh-context review of the spec against the intent and of the plan against the spec has already happened; apply agreed findings before opening build pull requests.
-- Build in fresh context with the repo's `AGENTS.md`, `REVIEW.md`, this file, the spec, and the plan (including deviations already recorded in `plan.md`).
+- Build in fresh context with the repo's `AGENTS.md`, `REVIEW.md`, this skill, the spec, and the plan (including deviations already recorded in `plan.md`).
 - One plan phase is one branch and one pull request unless the plan explicitly groups phases.
 - Update `AGENTS.md` in the same change when commands or recurring mistakes change.
 - Do not commit secrets, API keys, private keys, or other key material, or caches and generated output the repo ignores.
@@ -51,7 +61,7 @@ The published root `install.sh` in the skills repo is separate: a piped run defa
 ## Layout
 
 - Use root `AGENTS.md`, not `CLAUDE.md`. Use `.agents/skills/`, not `.claude/skills/`.
-- Product skills belong in `.agents/skills/<name>/` inside the product repo. Install the ai-native-sdlc playbook from the skills repo; do not copy the whole playbook tree into each product repo.
+- Product skills belong in `.agents/skills/<name>/` inside the product repo. Install shared skills from the skills repo; do not copy whole skill trees into each product repo.
 
 ## Repository admin
 

@@ -27,6 +27,7 @@ This repo's Cursor Cloud Agent environment does not use those curl lines. `.curs
 
 ## Skills
 
+- **[build-practices](.agents/skills/build-practices/SKILL.md)** — Shared rules for build pull requests and build review: writing rules, git workflow, merge gate, and Cloud Agent install boundaries. Loads on its own in any repo that installs this collection.
 - **[ai-native-sdlc](.agents/skills/ai-native-sdlc/SKILL.md)** — A disciplined cycle for one person building software with an agent: bootstrap, spec and plan, independent review, then a subagent that merges each phase when CI is green. Proved on goldvalue. Includes starter `AGENTS.md` and `REVIEW.md` templates.
 - **[canvas-pdf](.agents/skills/canvas-pdf/SKILL.md)** — Print a Cursor canvas to a PDF that matches the canvas on screen. The canvas is not a localhost site. Rebuild it as HTML and print with Playwright Chromium.
 - **[chromium-browser-automation](.agents/skills/chromium-browser-automation/SKILL.md)** — Drive a visible Chromium-family browser (Chrome, Chromium, Brave, Edge, or Playwright Chromium) over CDP. Dedicated profile, one-action CLI verbs, session stays open across steps.
