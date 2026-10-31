@@ -1,0 +1,171 @@
+name: test
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        timeout-minutes: 1
+      - name: Install shellcheck
+        timeout-minutes: 2
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Run shellcheck
+        timeout-minutes: 1
+        run: |
+          shellcheck install.sh .cursor/install.sh .cursor/start.sh .agents/skills/chromium-browser-automation/scripts/setup.sh
+
+  install-smoke:
+    name: install-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+        timeout-minutes: 1
+      - name: Installer smoke test
+        timeout-minutes: 1
+        run: |
+          timeout 30 bash <<'SMOKE'
+          set -eu
+          fake_git_dir=$(mktemp -d)
+          printf '%s\n' '#!/bin/sh' 'exit 99' >"$fake_git_dir/git"
+          chmod +x "$fake_git_dir/git"
+          export PATH="$fake_git_dir:$PATH"
+
+          home1=$(mktemp -d)
+          dest=$(mktemp -d)
+          HOME="$home1" ./install.sh "$dest"
+
+          installed=0
+          for dir in .agents/skills/*/; do
+            [ -d "$dir" ] || continue
+            [ -f "$dir/SKILL.md" ] || continue
+            name=$(basename "$dir")
+            test -f "$dest/$name/SKILL.md"
+            installed=$((installed + 1))
+          done
+          test "$installed" -ge 1
+
+          first_name=""
+          for dir in .agents/skills/*/; do
+            [ -d "$dir" ] || continue
+            [ -f "$dir/SKILL.md" ] || continue
+            first_name=$(basename "$dir")
+            break
+          done
+          canary="$dest/$first_name/canary-smoke"
+          echo canary >"$canary"
+          output=$(HOME="$home1" ./install.sh "$dest" 2>&1)
+          for dir in .agents/skills/*/; do
+            [ -d "$dir" ] || continue
+            [ -f "$dir/SKILL.md" ] || continue
+            name=$(basename "$dir")
+            echo "$output" | grep -q "skip $name"
+          done
+          test "$(cat "$canary")" = "canary"
+
+          home2=$(mktemp -d)
+          HOME="$home2" ./install.sh
+          for dir in .agents/skills/*/; do
+            [ -d "$dir" ] || continue
+            [ -f "$dir/SKILL.md" ] || continue
+            name=$(basename "$dir")
+            test -f "$home2/.agents/skills/$name/SKILL.md"
+          done
+
+          home3=$(mktemp -d)
+          HOME="$home3" bash .cursor/install.sh
+          for dir in .agents/skills/*/; do
+            [ -d "$dir" ] || continue
+            [ -f "$dir/SKILL.md" ] || continue
+            name=$(basename "$dir")
+            test -f "$home3/.cursor/skills-cursor/$name/SKILL.md"
+            test ! -e "$home3/.agents/skills/$name"
+          done
+          SMOKE
+
+  skill-frontmatter:
+    name: skill-frontmatter
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+        timeout-minutes: 1
+      - name: Validate SKILL.md frontmatter
+        timeout-minutes: 1
+        run: python3 <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          skills_root = Path(".agents/skills")
+          if not skills_root.is_dir():
+              print("missing .agents/skills", file=sys.stderr)
+              sys.exit(1)
+
+          dirs = [p for p in skills_root.iterdir() if p.is_dir()]
+          if not dirs:
+              print("no skill directories", file=sys.stderr)
+              sys.exit(1)
+
+          def parse_frontmatter(text: str):
+              if not text.startswith("---"):
+                  return None
+              end = text.find("\n---", 3)
+              if end == -1:
+                  return None
+              block = text[3:end].strip("\n")
+              return block
+
+          def field_value(block: str, key: str):
+              lines = block.splitlines()
+              i = 0
+              while i < len(lines):
+                  line = lines[i]
+                  if not line.startswith(f"{key}:"):
+                      i += 1
+                      continue
+                  rest = line[len(key) + 1 :].strip()
+                  if rest in (">-", "|"):
+                      folded = []
+                      i += 1
+                      while i < len(lines) and (lines[i].startswith("  ") or lines[i].startswith("\t")):
+                          folded.append(lines[i].strip())
+                          i += 1
+                      return "\n".join(folded).strip()
+                  return rest.strip('"').strip()
+              return None
+
+          ok = True
+          for skill_dir in sorted(dirs):
+              skill_md = skill_dir / "SKILL.md"
+              if not skill_md.is_file():
+                  print(f"{skill_dir.name}: missing SKILL.md", file=sys.stderr)
+                  ok = False
+                  continue
+              block = parse_frontmatter(skill_md.read_text())
+              if block is None:
+                  print(f"{skill_dir.name}: bad frontmatter fences", file=sys.stderr)
+                  ok = False
+                  continue
+              name = field_value(block, "name")
+              if name != skill_dir.name:
+                  print(f"{skill_dir.name}: name mismatch ({name!r})", file=sys.stderr)
+                  ok = False
+              desc = field_value(block, "description")
+              if not desc:
+                  print(f"{skill_dir.name}: missing description", file=sys.stderr)
+                  ok = False
+
+          sys.exit(0 if ok else 1)
+          PY
