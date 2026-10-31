@@ -32,7 +32,7 @@ When an intent arrives already labeled `small intent`, every thread for that int
 
 ## Named model
 
-When an intent names a model for some threads or for all of them, that choice wins over this skill's defaults, including [Small intent](#small-intent). If the named model cannot be launched, the thread stops and asks; do not fall back to another model.
+When an intent names a model for some threads or for all of them, that choice wins over this skill's defaults, including [Small intent](#small-intent). If the thread's model cannot be launched—named in the intent or set by this skill—the thread stops and asks; do not fall back to another model.
 
 Read [references/templates.md](references/templates.md) when writing the three files. Copy [assets/AGENTS.md](assets/AGENTS.md) and [assets/REVIEW.md](assets/REVIEW.md) only when those files are missing, then fill every placeholder from this repo. For build and build-review, load and follow the installed **build-practices** skill; do not paste its text into product repos. When the intent is labeled `small intent`, run every build and build-review thread on Composer 2.5 unless the intent names a model. Read [references/goldvalue.md](references/goldvalue.md) for the committed shape of that one run.
 
@@ -87,7 +87,7 @@ The spec wins over the plan. If the plan is the one that is right, change the sp
 
 They asked "are we at the build gate?" The answer in that session was: the gate is their approval of `plan.md`.
 
-They then asked for the last scrutiny before opening it, in this order. When the intent is labeled `small intent`, run every fresh-context subagent in this section on Composer 2.5 unless the intent names a model.
+They then asked for the last scrutiny before opening it, in this order. When the intent is labeled `small intent`, run every fresh-context subagent in this section on Composer 2.5 unless the intent names a model for that thread.
 
 1. A fresh-context subagent reads `spec.md` against `intent.md` and flags what is unclear, missing, or in conflict. It does not edit.
 2. You apply the findings you agree with, and you re-check any external fact the review disputes.
