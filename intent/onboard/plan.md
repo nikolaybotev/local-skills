@@ -195,3 +195,7 @@ fi
 The pull request is done when the workflow matches FR12–FR17, the check script exits 0, and `shellcheck`, `install-smoke`, and `skill-frontmatter` are green. The script must not treat a stray `timeout-minutes` string as proof the whole workflow matches. Squash-merge this phase first, only then, with no admin override (D8).
 
 After this phase is on `main`, required status checks are still not part of this plan (D7).
+
+### Phase 1 build notes
+
+- **Helper scripts under `.github/`.** FR15 and FR16 define the smoke and frontmatter checks; the plan file list names only `.github/workflows/test.yml`. Implementation adds `.github/install-smoke.sh` and `.github/skill-frontmatter-check.py` because inline `run:` heredocs in the workflow file are invalid once YAML step indentation is applied (heredoc delimiters must be column-zero). The workflow still invokes `timeout 30` on the smoke script (FR15) and runs the frontmatter logic unchanged (FR16). Spec wins on behavior; this note records the extra tracked paths.
