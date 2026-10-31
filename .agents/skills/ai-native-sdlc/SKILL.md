@@ -90,11 +90,11 @@ Do not run a second session against the same files. Two writers edited `spec.md`
 
 ## Writing
 
-These rules apply in every repo and every build phase. They belong in the product docs, scripts, workflows, and tests the builder writes.
+Rules 1 and 2 apply in every repo and every build phase, in all files the builder writes. Rule 3 applies only to human-facing docs.
 
-1. **No self-references.** Do not hardcode this repository's owner, short name, or canonical URL in prose, scripts, or workflows. In prose, say "this repo". In scripts and CI, derive the identifier from the checkout (`git remote`, `GITHUB_REPOSITORY`, or the Actions `github.repository` context) so forks and renames work without edits. Naming another repository is fine, including when an install script in another repo pulls skills from this one.
-2. **No values of variable config.** Do not copy the current value of a setting into docs, tests, or workflows. Examples include who a signing certificate is issued to, or paths that depend on one machine. Refer to the setting by name (the environment variable, secret, or config key). Tests assert behavior against whatever value is configured, not against a literal baked into the repo.
-3. **Do not state the obvious.** Drop notes a competent reader already knows, such as a parenthetical that success means exit code zero. Builders add these; reviewers cut them.
+1. **No self-references.** Never hardcode a repo's own owner, name, or URL. In prose say "this repo". In scripts and workflows derive it (`git remote`, `GITHUB_REPOSITORY`, or the Actions `github.repository` context) so forks work unchanged. References to other repos are fine, including another repo's install script pulling skills from this one.
+2. **No values of variable config.** Do not copy the current value of a setting (for example who a signing certificate is issued to, or machine-specific paths) into docs, tests, or workflows. Refer to the setting by its name (the env var, secret, or config key). Tests check behavior against the configured value, not a literal.
+3. **Do not state the obvious (human-facing docs only).** In README, user docs, and setup docs, drop notes a competent reader already knows, such as a parenthetical that success means exit 0. Builders tend to add these; reviewers should cut them. Do not apply this rule to agent-facing files: root `AGENTS.md`, `REVIEW.md`, skills (including this playbook), or intents written for agents. Those files keep explicit expectations such as "(healthy: exit 0)" because they help smaller models.
 
 ## Build
 
