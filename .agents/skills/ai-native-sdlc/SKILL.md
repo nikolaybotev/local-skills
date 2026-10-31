@@ -26,7 +26,7 @@ A disciplined way for one person to build software with an agent. Each stage end
 
 A later idea starts again at 1 in a new `intent/<change>/`. The sections below are the detail for these four. Do not treat this list as a second procedure.
 
-Read [references/templates.md](references/templates.md) when writing the three files. Copy [assets/AGENTS.md](assets/AGENTS.md) and [assets/REVIEW.md](assets/REVIEW.md) only when those files are missing, then fill every placeholder from this repo. Read [references/goldvalue.md](references/goldvalue.md) for the committed shape of that one run.
+Read [references/templates.md](references/templates.md) when writing the three files. Copy [assets/AGENTS.md](assets/AGENTS.md) and [assets/REVIEW.md](assets/REVIEW.md) only when those files are missing, then fill every placeholder from this repo. For build and build-review, read [BUILD_PRACTICES.md](BUILD_PRACTICES.md); install the skill and point at it—do not paste the full text into product repos. Read [references/goldvalue.md](references/goldvalue.md) for the committed shape of that one run.
 
 ## File names to use
 
@@ -71,7 +71,7 @@ They correct you in conversation. Write the correction into the spec or the plan
 
 If two requirements contradict, split a first release from a later one and tag the later items. The spec did that for multi-currency.
 
-The spec wins over the plan. If the plan is the one that is right, change the spec first.
+The spec wins over the plan. If the plan is the one that is right, change the spec first. During build, follow [BUILD_PRACTICES.md](BUILD_PRACTICES.md) for departures recorded in `plan.md`.
 
 ## Last scrutiny, then the build
 
@@ -88,25 +88,16 @@ They then asked for the last scrutiny before opening it, in this order:
 
 Do not run a second session against the same files. Two writers edited `spec.md` at once in that chat, and one had to stand down.
 
-## Writing
-
-Rules 1 and 2 apply in every repo and every build phase, in all files the builder writes. Rule 3 applies only to human-facing docs.
-
-1. **No self-references.** In prose about the repo itself, say "this repo" instead of hardcoding owner, name, or URL. Distribution entry points may hardcode a canonical location: a curl-to-sh one-liner, an installer's default source URL, or another repo's dependency that pulls skills from here (optional fork override such as `LOCAL_SKILLS_REPO_URL`). References to other repos are fine. Never derive this repo's identity from `GITHUB_REPOSITORY` in scripts or workflows that other repos' CI may run—that variable names the consuming repository. Elsewhere in scripts and workflows, derive identity with `git remote` or the Actions `github.repository` context when appropriate.
-2. **No values of variable config.** Do not copy the current value of a setting (for example who a signing certificate is issued to, or machine-specific paths) into docs, tests, or workflows. Refer to the setting by its name (the env var, secret, or config key). Tests check behavior against the configured value, not a literal.
-3. **Do not state the obvious (human-facing docs only).** In README, user docs, and setup docs, drop notes a competent reader already knows, such as a parenthetical that success means exit 0. Builders tend to add these; reviewers should cut them. Do not apply this rule to agent-facing files: root `AGENTS.md`, `REVIEW.md`, skills (including this playbook), or intents written for agents. Those files keep explicit expectations such as "(healthy: exit 0)" because they help smaller models.
-
 ## Build
 
 Hand a fresh-context subagent a chunk of the plan, not the design chat. Goldvalue sent Phases 0–2 together, then 3a–3c, then 4a–5, then 6a–6c. Use the session's default model unless they name one. They named Claude Sonnet for the build, and the parent did not substitute another model when that launch failed. It stopped and asked.
 
 The subagent works on its own. The prompt it was given:
 
-- Read `AGENTS.md`, `REVIEW.md`, the spec, and the plan, including deviations already recorded.
-- Where the plan and the spec disagree, the spec wins. Record the discrepancy in `plan.md`.
+- Read `AGENTS.md`, `REVIEW.md`, [BUILD_PRACTICES.md](BUILD_PRACTICES.md), the spec, and the plan, including deviations already recorded in `plan.md`.
+- Follow [BUILD_PRACTICES.md](BUILD_PRACTICES.md); use this repo's `AGENTS.md` for commands and the required check names for merge.
 - Do not ask questions. If something is undecidable, make the most conservative choice consistent with the spec, note it in `plan.md` under the phase, and continue.
-- Each phase is its own branch and its own pull request. The body lists the plan steps done and the definition-of-done evidence.
-- Merge only when CI is green, squash, delete the branch, then update `main` before the next phase. Do not merge red. Fix and push until green.
+- Each pull request body lists the plan steps done and the definition-of-done evidence.
 - Update `AGENTS.md` as commands and conventions land.
 - Reply with the merged pull request numbers, CI status, deviations recorded, and anything that needs the owner.
 
