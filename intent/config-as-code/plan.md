@@ -53,12 +53,12 @@ Phase 0 model: Composer 2.5. Do not substitute. If Composer 2.5 cannot be launch
 
 The only implementation phase. One pull request. Branch from `main` after this draft is on it.
 
-Files: `.agents/skills/cursor-cloud-environments/SKILL.md`, `.agents/skills/cursor-cloud-environments/references/api.md`, `AGENTS.md`, `REVIEW.md`, `README.md`
+Files: `.agents/skills/cursor-cloud-environments/SKILL.md`, `.agents/skills/cursor-cloud-environments/references/api.md`, `AGENTS.md`, `REVIEW.md`, `README.md`, `intent/config-as-code/plan.md` (only for a departure note)
 
-1. Edit `SKILL.md` to FR2 and FR4–FR7. Keep the folded description and `name: cursor-cloud-environments`. Do not reverse a D3 sentence.
-2. Edit `references/api.md` to FR3 and FR8. Do not add a calls-table row, a field, or an endpoint.
-3. Update the two `AGENTS.md` pointers (FR9) and the two `REVIEW.md` sentences (FR10). Leave every other sentence.
-4. Add `config-as-code/` under `intent/` in the README tree. Leave `onboard/` there. Do not change the cursor-cloud-environments blurb (FR11).
+1. Edit `SKILL.md` to FR2 and FR4–FR7. Keep the `>-` fold and `name: cursor-cloud-environments`. Do not freeze the description text. Put the FR4 route sentences in that description, and keep `SUCCEEDED`, the `.cursor/environment.json` edit ban, the API-key ban, and `cursor-cloud MCP` in the description. Leave `exit 127` and the primordial-build rules in the body. Replace the step-3 create sentence with the FR6 block. Keep "the list was empty, or they asked for a distinct one" only after "When the preferred path does not apply." Leave the other sentences D3 lists as they stand in `SKILL.md`. In `## Two routes`, the launch sentence and the adopt sentence stay in the same section. The adopt limits stay: single-repo, a valid file, adopt on a cloud-agent start. Do not call those sentences the same mechanism. No person, machine, model, host, or home directory in `SKILL.md` (D13).
+2. Edit `references/api.md` to FR3 and FR8. Do not add a calls-table row, a field, or an endpoint. The launch sentence stays beside the existing adopt sentence. The adopt limits stay: single-repo, a valid file, adopt on a cloud-agent start. Do not call those sentences the same mechanism. No person, machine, model, host, or home directory in `references/api.md` (D13).
+3. Update the two `AGENTS.md` pointers (FR9) and the two `REVIEW.md` sentences (FR10). Leave every other sentence. No person, machine, model, host, or home directory in `AGENTS.md` or `REVIEW.md` (D13).
+4. Add `config-as-code/` under `intent/` in the README tree. Leave `onboard/` there. Do not change the cursor-cloud-environments blurb (FR11). No person, machine, model, host, or home directory in `README.md` (D13).
 5. Do not modify `scripts/environments.py`, any other skill, `intent/onboard/`, the installers, or `.github/workflows/test.yml`.
 6. If a step departs from this plan, the spec wins. Write the departure into this file in the same commit.
 
@@ -76,6 +76,7 @@ review = Path("REVIEW.md").read_text()
 readme = Path("README.md").read_text()
 for s in [
     "name: cursor-cloud-environments",
+    "description: >-",
     "inline-config",
     "POST /v1/environments",
     "snapshots the config and does not follow the repo file",
@@ -84,11 +85,17 @@ for s in [
     "preferred path for new repos",
     "This skill does not write that file and does not launch that agent or Project.",
     "No saved environment means neither a personal nor a team saved environment matched this repo.",
+    "An empty personal list is not enough.",
+    "will not follow later edits",
     "Do not call `create`.",
+    "When the preferred path does not apply, create only when the user asked to create the environment and the list was empty, or they asked for a distinct one.",
     "--owner team",
     "Do not treat a failed team list as empty.",
     "That is the inline-config snapshot.",
-    "409 repo_file_environment_locked",
+    "Do not patch its `environmentJson` (`409 repo_file_environment_locked`).",
+    "Change the file and build that branch, or create a separate saved environment.",
+    "a repo-file environment is not updated with `--environment-json`",
+    "A cloud agent start on a single repo with no saved environment yet adopts a valid committed `.cursor/environment.json`.",
     "Do not use this to edit only a repo's .cursor/environment.json",
     "Do not create a new Cursor API key",
     "cursor-cloud MCP",
@@ -105,22 +112,88 @@ for s in [
 ]:
     if s not in skill:
         raise SystemExit(f"SKILL.md missing: {s}")
+old_create = "Create only when the user asked to create the environment and the list was empty, or they asked for a distinct one."
+if old_create in skill:
+    raise SystemExit("old step-3 create sentence still present")
+phrase = "the list was empty, or they asked for a distinct one"
+qualified = "When the preferred path does not apply, create only when the user asked to create the environment and the list was empty, or they asked for a distinct one."
+if skill.count(phrase) != 1 or qualified not in skill:
+    raise SystemExit("create phrase is not only after the preferred-path qualifier")
+if not skill.startswith("---"):
+    raise SystemExit("SKILL.md missing frontmatter")
+fm_end = skill.find("\n---", 3)
+if fm_end == -1:
+    raise SystemExit("SKILL.md missing frontmatter end")
+front = skill[3:fm_end]
+body = skill[fm_end + 4 :]
+desc_lines = []
+seen_desc = False
+for line in front.splitlines():
+    if line.startswith("description:"):
+        if line.split(":", 1)[1].strip() not in (">-", "|"):
+            raise SystemExit("description is not a folded block")
+        seen_desc = True
+        continue
+    if seen_desc:
+        if line.startswith("  ") or line.startswith("\t"):
+            desc_lines.append(line.strip())
+        else:
+            break
+if not desc_lines:
+    raise SystemExit("description missing")
+desc = " ".join(desc_lines)
+for s in [
+    "POST /v1/environments",
+    "inline-config",
+    "snapshots the config and does not follow the repo file",
+    "Config as code is the other route",
+    "preferred path for new repos",
+    "SUCCEEDED",
+    "Do not use this to edit only a repo's .cursor/environment.json",
+    "Do not create a new Cursor API key",
+    "cursor-cloud MCP",
+]:
+    if s not in desc:
+        raise SystemExit(f"description missing: {s}")
+for s in ["exit 127", "If any non-draft build is `IN_PROGRESS`, wait"]:
+    if s not in body:
+        raise SystemExit(f"body missing: {s}")
+    if s in desc:
+        raise SystemExit(f"description contains body rule: {s}")
+routes = skill.split("## Two routes", 1)
+if len(routes) != 2:
+    raise SystemExit("## Two routes missing")
+routes = routes[1].split("## Script", 1)[0]
+for s in [
+    "launching a cloud agent or Project on it without naming an environment",
+    "A cloud agent start on a single repo with no saved environment yet adopts a valid committed `.cursor/environment.json`.",
+]:
+    if s not in routes:
+        raise SystemExit(f"## Two routes missing: {s}")
 for s in [
     "1. A personal saved environment",
     "2. A team saved environment",
     "for a single-repo cloud agent, when no saved environment matches",
     "`repoFile` stays unset.",
     "adopts a valid committed `.cursor/environment.json`",
-    "409 repo_file_environment_locked",
+    "Patching `environmentJson` on that kind returns `409 repo_file_environment_locked`.",
     "Change the file and build that branch, or create a separate saved environment.",
     "is the inline-config route. It snapshots the config and does not follow the repo file.",
     "a cloud agent start on a single repo with no saved environment yet adopts a valid committed",
+    "launching a cloud agent or Project on it without naming an environment",
     "preferred path for new repos. It is not `POST /v1/environments`.",
     "neither a personal nor a team saved environment matched",
     "| `create` | `POST /v1/environments` |",
 ]:
     if s not in api:
         raise SystemExit(f"api.md missing: {s}")
+resolution = api.split("## Calls the script makes", 1)[0]
+for s in [
+    "launching a cloud agent or Project on it without naming an environment",
+    "a cloud agent start on a single repo with no saved environment yet adopts a valid committed `.cursor/environment.json`",
+]:
+    if s not in resolution:
+        raise SystemExit(f"resolution section missing: {s}")
 if "The current change is documented in `intent/config-as-code/`." not in agents:
     raise SystemExit("AGENTS.md pointer missing")
 if "intent/onboard/` is historical." not in agents:
@@ -142,6 +215,8 @@ for s in [
     "skill-frontmatter",
     "CodeQL",
     "workflow_dispatch",
+    "Historical onboarding did not change skill behavior.",
+    "No other path under `.agents/skills/` changes.",
 ]:
     if s not in review:
         raise SystemExit(f"REVIEW.md missing: {s}")
