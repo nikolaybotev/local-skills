@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Piped install without a checkout: default URL, no override env (unset GITHUB_REPOSITORY in Actions).
+home_pipe=$(mktemp -d)
+pipe_dest=$(mktemp -d)
+(
+  unset LOCAL_SKILLS_REPO_URL
+  unset GITHUB_REPOSITORY
+  HOME="$home_pipe" sh -s -- "$pipe_dest" <./install.sh
+)
+pipe_installed=0
+for dir in .agents/skills/*/; do
+  [ -d "$dir" ] || continue
+  [ -f "$dir/SKILL.md" ] || continue
+  name=$(basename "$dir")
+  test -f "$pipe_dest/$name/SKILL.md"
+  pipe_installed=$((pipe_installed + 1))
+done
+test "$pipe_installed" -ge 1
+
 fake_git_dir=$(mktemp -d)
 printf '%s\n' '#!/bin/sh' 'exit 99' >"$fake_git_dir/git"
 chmod +x "$fake_git_dir/git"
