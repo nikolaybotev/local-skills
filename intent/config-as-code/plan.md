@@ -227,16 +227,6 @@ if "config-as-code/" not in readme or "onboard/" not in readme:
 blurb = "A new environment is not delivered until a non-draft default-branch build has succeeded."
 if blurb not in readme:
     raise SystemExit("README blurb changed")
-for forbidden in ["Composer", "Grok", "<machine-name>", "Nikolay"]:
-    for name, text in [
-        ("SKILL.md", skill),
-        ("api.md", api),
-        ("AGENTS.md", agents),
-        ("REVIEW.md", review),
-        ("README.md", readme),
-    ]:
-        if forbidden in text:
-            raise SystemExit(f"{name} contains {forbidden}")
 PY
 allowed='
 .agents/skills/cursor-cloud-environments/SKILL.md

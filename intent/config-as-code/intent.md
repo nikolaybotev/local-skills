@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Author | Nikolay Botev |
 | Captured | 2026-10-30 |
 | Status | Draft |
 | Stage | 1 · Plan |

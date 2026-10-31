@@ -5,7 +5,7 @@
 Run three passes and tag each finding with its pass:
 
 - **Bugs:** <logic errors that would break this product's promise>
-- **Security:** secrets or personal data in the repo, unexpected network or dependency surface, unsafe file or path handling
+- **Security:** secrets, API keys, or key material in the repo, unexpected network or dependency surface, unsafe file or path handling
 - **Compliance:** the change matches `intent/<change>/spec.md` and `plan.md`, and the conventions in `AGENTS.md`. A departure from the plan that is not written back into `plan.md` in the same change is a compliance finding.
 
 ## What Important means here

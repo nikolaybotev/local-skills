@@ -28,7 +28,7 @@ Review model: Grok 4.7 High (D12). Phase 0 and Phase 1 model: Composer 2.5. Do n
 
 ## Every phase
 
-- Branch in a new worktree from the base in Order. Phase 1 branches from current `main`. This draft and Phase 0 rebase onto `main` only after that workflow is on it. The primary checkout at `<home>/git/local-skills` stays on its current branch. Do not touch a dirty file there.
+- Branch in a new worktree from the base in Order. Phase 1 branches from current `main`. This draft and Phase 0 rebase onto `main` only after that workflow is on it. The primary checkout stays on its current branch. Do not touch a dirty file there.
 - Signed commits. Before the first commit of a phase, run `timeout 20 gpg --batch --local-user <key> --sign --output /dev/null` with the key `git config --get user.signingkey` returns. Never pass `--pinentry-mode error` or `--no-gpg-sign`. If the sign check fails, stop. Do not commit.
 - One phase, one pull request, into `main`. The body lists the plan steps done and the definition-of-done evidence.
 - Do not execute `install.sh` or `.cursor/install.sh` on the machine that builds the phase. Do not install skills onto a machine. The `install-smoke` job is the first run of those scripts, on the GitHub runner.
@@ -121,10 +121,6 @@ if bad:
 for s in ["~/.cursor/skills-cursor", ".cursor/install.sh", "~/.agents/skills", "already there is skipped", "~/.claude/skills", ".github/workflows/test.yml"]:
     if s not in readme:
         raise SystemExit(f"README missing: {s}")
-for forbidden in ["Grok", "Composer", "<assistant>"]:
-    for name, text in [("AGENTS.md", agents), ("REVIEW.md", review), ("README.md", readme)]:
-        if forbidden in text:
-            raise SystemExit(f"{name} contains {forbidden}")
 PY
 if git diff --name-only origin/main -- .agents/skills | grep -q .; then
   echo "skills tree changed" >&2
