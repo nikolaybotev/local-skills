@@ -46,10 +46,10 @@ This draft does not edit the skill. Phase 0 does, in one pull request. The skill
 
 ## 4. Users and scenarios
 
-- An agent setting up a new repo, with a committed `.cursor/environment.json` and no personal or team saved environment, points at Config as code and does not call `create`.
-- The file is not committed yet. The agent still points at committing it and launching without a named environment. It does not write the file and does not call `create` unless the user asked for an inline snapshot.
-- The user asked for an environment that will not follow later edits to the file. The agent uses the existing create procedure, including the primordial-build rules.
-- A personal or team saved environment already matches. The agent does not describe an unnamed launch as creating a file-following environment.
+- Both repo-scoped lists are empty, and the user did not ask for an environment that will not follow later edits. The agent points at Config as code and does not call `create`. If the committed `.cursor/environment.json` is not there yet, the agent points at committing it and launching without a named environment, and does not write the file.
+- When that path does not apply, create only when the user asked to create the environment and the list was empty, or they asked for a distinct one.
+- The user asked for an environment that will not follow later edits to the file. The preferred path does not apply, so that create sentence applies, including the primordial-build rules.
+- A personal or team saved environment already matches this repo. The agent does not describe an unnamed launch as creating a file-following environment.
 - A self-hosted run still does not read `.cursor/environment.json`.
 
 ## 5. Functional requirements
@@ -113,34 +113,36 @@ This skill covers inline-config environments created through the API (`POST /v1/
 
 Config as code is the other route. When a repo has a committed `.cursor/environment.json` and no saved environment, launching a cloud agent or Project on it without naming an environment makes Cursor create one that follows the file. That is the preferred path for new repos. This skill does not write that file and does not launch that agent or Project.
 
-No saved environment means no personal saved environment and no team saved environment. An empty personal list is not enough.
+No saved environment means neither a personal nor a team saved environment matched this repo. An empty personal list is not enough.
+
+A cloud agent start on a single repo with no saved environment yet adopts a valid committed `.cursor/environment.json`.
 ```
 
-Do not add a third route. Do not explain a difference between "adopts a valid committed `.cursor/environment.json`" and "create one that follows the file." D10.
+Do not add a third route. The prompt sentence and the adopt sentence stay in this section. The adopt limits stay: single-repo, a valid file, adopt on a cloud-agent start. D10.
 
-FR6. At the start of procedure step 3, add these sentences verbatim. Keep the existing "Create only when" sentence and steps 4–7.
+FR6. At the start of procedure step 3, add these sentences verbatim. Replace the existing create sentence with the qualified sentence in the block. Keep steps 4–7, and add the step 7 clause in FR7.
 
 ```markdown
-When the preferred path applies, stop before create and point at Config as code. Do not call `create`. The preferred path applies to a new repo when the user did not ask for an inline-config snapshot, `list --repo github.com/owner/name --owner personal` is empty, and `list --repo github.com/owner/name --owner team` is empty. If the committed `.cursor/environment.json` is not there yet, point at committing that file and launching a cloud agent or Project without naming an environment. Do not write the file. If the team list call fails, stop and report the error. Do not treat a failed team list as empty. If either list has an id, this is not the no-saved-environment case: say that a saved environment already matches, and do not describe an unnamed launch as creating a file-following environment.
+When the preferred path applies, stop before create and point at Config as code. Do not call `create`. The preferred path applies when `list --repo github.com/owner/name --owner personal` is empty, `list --repo github.com/owner/name --owner team` is empty, and the user did not ask for an environment that will not follow later edits. If the committed `.cursor/environment.json` is not there yet, point at committing that file and launching a cloud agent or Project without naming an environment. Do not write the file. If the team list call fails, stop and report the error. Do not treat a failed team list as empty. If either list has an id, this is not the no-saved-environment case: say that a saved environment already matches, and do not describe an unnamed launch as creating a file-following environment. When the preferred path does not apply, create only when the user asked to create the environment and the list was empty, or they asked for a distinct one.
 ```
 
-`list`, `get`, `history`, and `active` still do not start a build. Step 2's personal-list rules stay: one personal id is kept, more than one personal id stops to ask, and an empty personal list is what allows create when the user asked for inline-config.
+`list`, `get`, `history`, and `active` still do not start a build. Step 2's personal-list rules stay: one personal id is kept, and more than one personal id stops to ask. An empty personal list does not by itself allow create.
 
 FR7. In the Report section, keep the personal-override sentence and the `repoFile` sentence. Add these sentences verbatim after them:
 
 ```markdown
-That is the inline-config snapshot. A Config as code environment follows the file. Do not patch its `environmentJson`. Change the file and build that branch, or create a separate saved environment (`409 repo_file_environment_locked`).
+That is the inline-config snapshot. A Config as code environment follows the file. Do not patch its `environmentJson` (`409 repo_file_environment_locked`). Change the file and build that branch, or create a separate saved environment.
 ```
 
-Do not say a commit by itself starts a build. Do not say the script can set `repoFile`.
+On procedure step 7, add this clause: a repo-file environment is not updated with `--environment-json`. Do not say a commit by itself starts a build. Do not say the script can set `repoFile`.
 
 FR8. In `references/api.md`, immediately after the paragraph that contains `` `repoFile` stays unset ``, add these sentences verbatim:
 
 ```markdown
-The script's create, `POST /v1/environments`, is the inline-config route. It snapshots the config and does not follow the repo file. The other kind is Config as code. When a repo has a committed `.cursor/environment.json` and no saved environment, launching a cloud agent or Project on it without naming an environment makes Cursor create one that follows the file. That is the preferred path for new repos. It is not `POST /v1/environments`. No saved environment here means neither a personal nor a team saved environment matched.
+The script's create, `POST /v1/environments`, is the inline-config route. It snapshots the config and does not follow the repo file. When a repo has a committed `.cursor/environment.json` and no saved environment, launching a cloud agent or Project on it without naming an environment makes Cursor create one that follows the file. That is the preferred path for new repos. It is not `POST /v1/environments`. No saved environment here means neither a personal nor a team saved environment matched this repo.
 ```
 
-Do not otherwise rewrite that file. The adopt sentence and the `409` sentence stay beside the new sentences. They are the same route, not a third one.
+Do not otherwise rewrite that file. Keep the adopt sentence beside the new sentences: a cloud agent start on a single repo with no saved environment yet adopts a valid committed `.cursor/environment.json`. Those limits stay: single-repo, a valid file, adopt on a cloud-agent start. Do not call that sentence the same mechanism as the prompt's launch sentence.
 
 ### Handbook
 
@@ -192,11 +194,11 @@ FR12. Phase 0 is one pull request into `main`. Squash-merge it only when `shellc
 
 **D7 — The skill still does not edit the file.** The frontmatter ban on using this skill only to edit `.cursor/environment.json` stays. Pointing at Config as code is not a procedure that writes the file.
 
-**D8 — Preference is not a ban on snapshots.** The prompt says the skill covers the inline route and points at Config as code as preferred. When the user asks for an inline-config snapshot, the existing create procedure remains, including primordial build, history, drafts, 503/429, and delete. A new repo does not take that path unless they asked for the snapshot.
+**D8 — Preference is not a ban on snapshots.** The prompt says the skill covers the inline route and points at Config as code as preferred. The preferred path applies when both repo-scoped lists are empty and the user did not ask for an environment that will not follow later edits. On that path, do not call `create`. When that path does not apply, the create sentence applies: create only when the user asked to create the environment and the list was empty, or they asked for a distinct one. Primordial build, history, drafts, 503/429, and delete stay. Checked `SKILL.md` step 3 on this branch for that create sentence.
 
 **D9 — "Follows the file" uses the existing 409 guidance.** `references/api.md` says the repo-file environment reads `.cursor/environment.json` from its only repo, and that the change is to edit the file and build that branch, or to create a separate saved environment. Patching `environmentJson` returns `409 repo_file_environment_locked`. The skill repeats that. It does not say a commit alone starts a build. It does not add `repoFile` to the create body.
 
-**D10 — One other route.** The prompt's "create one that follows the file" and the reference's "adopts a valid committed `.cursor/environment.json`" are Config as code, not two mechanisms. The single-repo adopt sentence stays. The prompt's sentence is one repo, one committed file, no saved environment, cloud agent or Project, no environment named. Do not add a multi-repo rule. Do not add a Project endpoint. Do not delete the single-repo sentence.
+**D10 — Prompt sentence and adopt limits.** Checked `references/api.md` on this branch. The adopt sentence is: a cloud agent start on a single repo with no saved environment yet adopts a valid committed `.cursor/environment.json`. Those limits stay in the same section as the prompt sentence: single-repo, a valid file, adopt on a cloud-agent start. The prompt sentence stays: when a repo has a committed `.cursor/environment.json` and no saved environment, launching a cloud agent or Project on it without naming an environment makes Cursor create one that follows the file. This spec does not call those the same mechanism. The skill may state the difference. Do not delete the adopt sentence. Do not add an endpoint or a field the reference does not have.
 
 **D11 — Phase 0 file list.** D4 is stated in `SKILL.md` and, so the reference the skill points at does not contradict it, in `references/api.md` with the FR8 sentences only. No script change.
 
