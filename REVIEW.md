@@ -6,15 +6,9 @@ Run three passes and tag each finding with its pass:
 
 - **Bugs:** the installer writes into a real home, leaves an existing skill directory untouched so a skip looks like success, clones the default branch (today `main`) when the review subject was a checkout, drops a directory that has no `SKILL.md`, passes a destination to `.cursor/install.sh`, or points a Cloud Agent at `~/.cursor/skills` instead of `~/.cursor/skills-cursor`. A skill change that relaunches a browser after `SESSION_DEAD`, starts a second environment build while a non-draft build is in progress, prints a canvas with the visible-browser skill, or uses `chromium.launch()` from the browser skill.
 - **Security:** secrets, API keys, or key material in the repo or in instructions that print them. Reimplementing worker-key discovery with `ps`, `env`, or `pgrep`. An install or smoke test whose destination is outside a temporary directory. A network fetch from the product installer or from CI beyond checking out the repo and installing `shellcheck`.
-- **Compliance:** the change matches `intent/<change>/spec.md` and `plan.md`, and the conventions in `AGENTS.md`. A departure from the plan that is not written back into `plan.md` in the same change is a compliance finding. Skills and docs stay generic. Historical `intent/` folders stay untouched. Historical onboarding did not change skill behavior. This change may edit `.agents/skills/cursor-cloud-environments/SKILL.md` and `.agents/skills/cursor-cloud-environments/references/api.md` only, as `intent/config-as-code/spec.md` requires. No other path under `.agents/skills/` changes. The workflow, once present, keeps the jobs `shellcheck`, `install-smoke`, and `skill-frontmatter`, does not add CodeQL, and does not add `workflow_dispatch`.
+- **Compliance:** the change matches `intent/<change>/spec.md` and `plan.md`, and the conventions in `AGENTS.md`. A departure from the plan that is not written back into `plan.md` in the same change is a compliance finding. Skills and docs stay generic. Historical `intent/` folders stay untouched. The workflow keeps the jobs `shellcheck`, `install-smoke`, and `skill-frontmatter`, does not add CodeQL, and does not add `workflow_dispatch`.
 
-## Builder writing
-
-Tag these under **Compliance** unless they would break the product; then use **Important** under Bugs.
-
-- **Self-reference:** prose about this repo hardcodes its owner, name, or URL instead of saying "this repo". Distribution entry points may hardcode a canonical location—a curl-to-sh one-liner, an installer's default source URL, or another repo's dependency that pulls these skills—with an optional override such as `LOCAL_SKILLS_REPO_URL` for forks. References to other repos are fine. Never derive this repo's identity from `GITHUB_REPOSITORY` in code other repos' CI may run.
-- **Variable config:** docs, tests, or workflows embed a literal value where the design names a setting (env var, secret, or config key). Tests check the configured value, not a literal.
-- **Obvious notes (human-facing docs only):** in README, user docs, or setup docs, parentheticals or asides that restate what the reader already knows (for example that a successful command exits zero). Do not flag explicit expectations in agent-facing files (`AGENTS.md`, `REVIEW.md`, skills, intents for agents); those notes stay.
+Also apply the installed **build-practices** skill when reviewing build pull requests.
 
 ## What Important means here
 

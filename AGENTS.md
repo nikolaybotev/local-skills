@@ -10,16 +10,8 @@ Reusable agent skills for local and cloud agents that read the Agent Skills layo
 
 ## Conventions
 
-Docs follow the solo AI-native SDLC chain: `intent/<change>/intent.md` → `spec.md` → `plan.md`. Update `plan.md` in the same commit when implementation departs from it. The spec wins when the plan and spec disagree.
-
-The cycle has four stages—no extra stage:
-
-1. **Bootstrap.** `AGENTS.md`, `REVIEW.md`, `README.md`, and `intent/<change>/` with the verbatim prompt plus `spec.md` and `plan.md`.
-2. **Spec and plan.** Iterate both. Corrections become decisions. Check a fact before it hardens. The spec wins.
-3. **Fresh-context review.** One fresh-context review reads the spec against the intent. Another fresh-context review reads the plan against the spec. The review does not edit and does not start the build. Apply the review, then build when nothing still needs the owner.
-4. **Build.** Each phase is one pull request. Squash-merge it only when `shellcheck`, `install-smoke`, and `skill-frontmatter` have succeeded, never with an admin override. Merging this draft, or a docs-only pull request, before that workflow is on the branch does not meet the rule. Then start the next phase.
-
-Merge rules for this repo: pull request only, squash merge, signed commits, linear history, delete branch on merge, no admin override. Squash-merge only when `shellcheck`, `install-smoke`, and `skill-frontmatter` have succeeded. Merging a docs-only pull request before `.github/workflows/test.yml` is on the branch does not meet the rule.
+- For build and build-review, load and follow the installed **build-practices** skill. Required merge checks here are `shellcheck`, `install-smoke`, and `skill-frontmatter`.
+- Use the **ai-native-sdlc** skill for bootstrap, spec, plan, and build orchestration. Historical folders under `intent/` are not edited in place.
 
 ## Architecture
 
@@ -42,6 +34,5 @@ Merge rules for this repo: pull request only, squash merge, signed commits, line
 - `canvas-pdf` rebuilds a canvas as HTML. A canvas is not a localhost site. Do not print it with the visible-browser skill.
 - The browser skill uses a dedicated profile under the skill `.cache/user-data`. Do not point it at a daily profile. Do not `killall` Chrome, Brave, or Edge. Do not use `chromium.launch()` from the browser skill. On `SESSION_DEAD` (exit 2), stop. Do not relaunch unless the user asks.
 - Do not start another Cloud Agent environment build while a non-draft build is in progress, and do not call an environment ready before a non-draft default-branch build has succeeded. CI does not call that API and does not run the browser setup.
-- Do not edit a historical `intent/` folder. A new change is a new folder. Do not create `CLAUDE.md` or `.claude/skills/` in this repo.
-- Do not write a skill or a doc for one machine. No host name, no person's home directory, no model name.
+- Do not edit a historical `intent/` folder. A new change is a new folder.
 - Do not add a CodeQL workflow. Do not add a `workflow_dispatch` trigger.
