@@ -12,7 +12,11 @@ Cursor picks the first match:
 2. A team saved environment
 3. `.cursor/environment.json` in the repository, for a single-repo cloud agent, when no saved environment matches
 
-Creating with this script makes a saved environment (a personal one, unless `--owner team`). That is a copy of the JSON. `repoFile` stays unset. An environment that reads its config from the repo is a different kind: a cloud agent start on a single repo with no saved environment yet adopts a valid committed `.cursor/environment.json`. Patching `environmentJson` on that kind returns `409 repo_file_environment_locked`.
+Creating with this script makes a saved environment (a personal one, unless `--owner team`). That is a copy of the JSON. `repoFile` stays unset.
+
+The script's create, `POST /v1/environments`, is the inline-config route. It snapshots the config and does not follow the repo file. When a repo has a committed `.cursor/environment.json` and no saved environment, launching a cloud agent or Project on it without naming an environment makes Cursor create one that follows the file. That is the preferred path for new repos. It is not `POST /v1/environments`. No saved environment here means neither a personal nor a team saved environment matched this repo.
+
+An environment that reads its config from the repo is a different kind: a cloud agent start on a single repo with no saved environment yet adopts a valid committed `.cursor/environment.json`. Patching `environmentJson` on that kind returns `409 repo_file_environment_locked`.
 
 ## Calls the script makes
 

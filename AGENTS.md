@@ -1,6 +1,6 @@
 # Local Agent Skills
 
-Reusable agent skills for local and cloud agents that read the Agent Skills layout. Skill sources live under `.agents/skills/`. The current change is documented in `intent/onboard/`.
+Reusable agent skills for local and cloud agents that read the Agent Skills layout. Skill sources live under `.agents/skills/`. The current change is documented in `intent/config-as-code/`.
 
 ## Commands
 
@@ -26,7 +26,7 @@ Merge rules for this repo: pull request only, squash merge, signed commits, line
 - `.agents/skills/` — skill packages (`SKILL.md` plus scripts and references).
 - `install.sh` — copies skills from a checkout or a shallow clone into a destination directory.
 - `.cursor/` — Cloud Agent environment hooks (`environment.json`, `install.sh`, `start.sh`).
-- `intent/<change>/` — intent, spec, and plan for the active change (currently `intent/onboard/`).
+- `intent/<change>/` — intent, spec, and plan for the active change (currently `intent/config-as-code/`). `intent/onboard/` is historical.
 - Root `AGENTS.md` and `REVIEW.md` — handbook and review guide for this repo (not the templates under `.agents/skills/ai-native-sdlc/assets/`).
 
 ## Things agents get wrong
