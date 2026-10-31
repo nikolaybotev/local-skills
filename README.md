@@ -14,14 +14,14 @@ curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/inst
 
 From a checkout of this repo, `./install.sh` installs that checkout instead of cloning.
 
-Pass another directory when an agent looks somewhere else. Pi and OpenCode read `~/.agents/skills`. Claude Code reads `~/.claude/skills`. Cursor on your machine reads both. A Cursor Cloud Agent reads `~/.cursor/skills` on its VM, and does not read `~/.agents/skills`.
+Pass another directory when an agent looks somewhere else. Pi and OpenCode read `~/.agents/skills`. Claude Code reads `~/.claude/skills`. Cursor on your machine reads both. A Cursor Cloud Agent reads `~/.cursor/skills-cursor` on its VM, and does not read `~/.agents/skills`.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s -- ~/.claude/skills
-curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s -- ~/.cursor/skills
+curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s -- ~/.cursor/skills-cursor
 ```
 
-The Cursor Cloud Agent environment install command is the `~/.cursor/skills` line. That puts the skills on the VM without cloning this repo next to the project.
+This repo's Cursor Cloud Agent environment does not use those curl lines. `.cursor/environment.json` runs `bash .cursor/install.sh`, which installs this checkout into `~/.cursor/skills-cursor`.
 
 ## Skills
 
@@ -41,6 +41,15 @@ The Cursor Cloud Agent environment install command is the `~/.cursor/skills` lin
 ```
 local-skills/
 ├── README.md
+├── AGENTS.md
+├── REVIEW.md
+├── install.sh
+├── intent/
+│   └── onboard/
+├── .cursor/
+│   ├── environment.json
+│   ├── install.sh
+│   └── start.sh
 ├── .github/
 │   └── workflows/
 │       └── test.yml  (.github/workflows/test.yml)
@@ -54,7 +63,8 @@ local-skills/
         │   ├── SKILL.md
         │   └── scripts/print_html_pdf.py
         ├── chromium-browser-automation/
-        │   └── SKILL.md
+        │   ├── SKILL.md
+        │   └── scripts/
         └── cursor-cloud-environments/
             ├── SKILL.md
             ├── scripts/environments.py
