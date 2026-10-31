@@ -14,7 +14,7 @@ Tag these under **Compliance** unless they would break the product; then use **I
 
 - **Self-reference:** prose, scripts, or workflows hardcode this repo's owner, name, or URL instead of "this repo" or a derived identifier.
 - **Variable config:** docs, tests, or workflows embed a literal value where the design names a setting (env var, secret, or config key).
-- **Obvious notes:** parentheticals or asides that restate what the reader already knows (for example that a successful command exits zero).
+- **Obvious notes (human-facing docs only):** in README, user docs, or setup docs, parentheticals or asides that restate what the reader already knows (for example that a successful command exits zero). Do not flag explicit expectations in agent-facing files (`AGENTS.md`, `REVIEW.md`, skills, intents for agents); those notes stay.
 
 ## What Important means here
 
