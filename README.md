@@ -45,6 +45,7 @@ local-skills/
 ├── REVIEW.md
 ├── install.sh
 ├── intent/
+│   ├── config-as-code/
 │   └── onboard/
 ├── .cursor/
 │   ├── environment.json
