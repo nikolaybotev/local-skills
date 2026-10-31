@@ -57,6 +57,23 @@ The published root `install.sh` in the skills repo is separate: a piped run defa
 - When the repo requires signed commits, sign them; do not bypass signing.
 - One writer per intent file at a time during design; do not run two sessions editing the same `spec.md` or `plan.md` concurrently.
 
+## Testing
+
+Four kinds of check:
+
+- **Unit.** One piece in isolation, everything around it faked. Covers one function or module's logic.
+- **Integration.** Real pieces working together in a real process, with the far end faked (for example a fake webhook receiver). Covers how components fit together.
+- **End-to-end.** The whole feature through its real interfaces as deployed, nothing faked between the two ends.
+- **Live check.** A quick check of one real installed deployment in place, by hand or from a routine. It is not a test suite.
+
+End-to-end is a convention, not a precise term. Whenever a test, pull request, or review calls something end-to-end, state its two ends. A good default for the ends is wherever a real user or outside system touches the feature: in through the real interface, out to the real effect. Scope the ends to the feature under test. For example, for a config hot-reload feature the ends are a real config edit and the installed service logging the reload with the same process ID, not what the service does afterwards.
+
+If anything between the two ends is faked, it is integration, not end-to-end.
+
+Keep many unit tests, fewer integration tests, and only a few end-to-end ones, because bigger tests are slower, more fragile, and harder to pin down when they fail.
+
+Reviewers should flag a test mislabeled as end-to-end when it fakes something between its ends.
+
 ## Layout
 
 - Use root `AGENTS.md`, not `CLAUDE.md`. Use `.agents/skills/`, not `.claude/skills/`.
