@@ -8,25 +8,20 @@ Each skill is a self-contained `SKILL.md` file that teaches the agent how to per
 
 Skills install into `~/.agents/skills`. A folder that is already there is skipped.
 
-Clone this repo, then run the installer from that checkout (it copies this tree instead of cloning again):
-
 ```sh
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s
 ```
+
+From a checkout of this repo, `./install.sh` installs that checkout instead of cloning.
 
 Pass another directory when an agent looks somewhere else. Pi and OpenCode read `~/.agents/skills`. Claude Code reads `~/.claude/skills`. Cursor on your machine reads both. A Cursor Cloud Agent reads `~/.cursor/skills-cursor` on its VM, and does not read `~/.agents/skills`.
 
 ```sh
-./install.sh ~/.claude/skills
-./install.sh ~/.cursor/skills-cursor
+curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s -- ~/.claude/skills
+curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s -- ~/.cursor/skills-cursor
 ```
 
-Without a checkout, set `GITHUB_REPOSITORY` (or `LOCAL_SKILLS_REPO_URL`) to this repo, pipe `install.sh` from the matching default branch on GitHub, then pass a destination if needed:
-
-```sh
-curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/install.sh" | sh -s
-curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/install.sh" | sh -s -- ~/.cursor/skills-cursor
-```
+Set `LOCAL_SKILLS_REPO_URL` when installing from a fork.
 
 This repo's Cursor Cloud Agent environment does not use those curl lines. `.cursor/environment.json` runs `bash .cursor/install.sh`, which installs this checkout into `~/.cursor/skills-cursor`.
 

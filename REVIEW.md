@@ -12,7 +12,7 @@ Run three passes and tag each finding with its pass:
 
 Tag these under **Compliance** unless they would break the product; then use **Important** under Bugs.
 
-- **Self-reference:** prose, scripts, or workflows hardcode this repo's owner, name, or URL instead of "this repo" or a derived identifier (`git remote`, `GITHUB_REPOSITORY`, or the Actions `github.repository` context). References to other repos are fine.
+- **Self-reference:** prose about this repo hardcodes its owner, name, or URL instead of saying "this repo". Distribution entry points may hardcode a canonical location—a curl-to-sh one-liner, an installer's default source URL, or another repo's dependency that pulls these skills—with an optional override such as `LOCAL_SKILLS_REPO_URL` for forks. References to other repos are fine. Never derive this repo's identity from `GITHUB_REPOSITORY` in code other repos' CI may run.
 - **Variable config:** docs, tests, or workflows embed a literal value where the design names a setting (env var, secret, or config key). Tests check the configured value, not a literal.
 - **Obvious notes (human-facing docs only):** in README, user docs, or setup docs, parentheticals or asides that restate what the reader already knows (for example that a successful command exits zero). Do not flag explicit expectations in agent-facing files (`AGENTS.md`, `REVIEW.md`, skills, intents for agents); those notes stay.
 
