@@ -4,7 +4,7 @@ Reusable agent skills for local and cloud agents that read the Agent Skills layo
 
 ## Commands
 
-- Install (checkout only, never a real home): `./install.sh /path/to/empty-dest`. Healthy output includes `installed <name> ->` lines and ends with `done: <n> installed, <skipped> skipped, destination <absolute>`. The default destination of `install.sh` is `$HOME/.agents/skills`; automation must not use it. `.cursor/install.sh` takes no destination argument; its only safe use is with a temporary `HOME` (it installs into `${HOME}/.cursor/skills-cursor`). Do not run either installer against a real home.
+- Install (checkout only, never a real home): `./install.sh /path/to/empty-dest`. Healthy output includes `installed <name> ->` or `updated <name> ->` lines and ends with `done: <n> installed, <updated> updated, <removed> removed, destination <absolute>`. The default destination of `install.sh` is `$HOME/.agents/skills`; automation must not use it. `.cursor/install.sh` takes no destination argument; its only safe use is with a temporary `HOME` (it installs into `${HOME}/.cursor/skills-cursor`). Do not run either installer against a real home.
 - Lint: `shellcheck` on `install.sh`, `.cursor/install.sh`, `.cursor/start.sh`, and `.agents/skills/chromium-browser-automation/scripts/setup.sh`. Healthy: no findings. The first script is POSIX `sh`. The other three are bash. Shellcheck follows each shebang.
 - Test: GitHub Actions jobs `shellcheck`, `install-smoke`, and `skill-frontmatter`. Healthy: all three succeeded. Do not document a local `install.sh` against a real home as the test.
 
@@ -24,7 +24,7 @@ Reusable agent skills for local and cloud agents that read the Agent Skills layo
 ## Things agents get wrong
 
 - Do not run `install.sh` or `.cursor/install.sh` against a real `$HOME`. An explicit destination applies only to `install.sh`. `.cursor/install.sh` takes no destination. It always runs the root installer into `${HOME}/.cursor/skills-cursor`. For `.cursor/install.sh`, the only safe use is a temporary `HOME`. The default destination of `install.sh` is `$HOME/.agents/skills`.
-- `install.sh` leaves an existing skill directory untouched. A skip is not an update.
+- Re-running `install.sh` into the same destination replaces skills from the current source, removes installed skill directories that no longer appear in the source, and leaves other paths in the destination alone.
 - A piped install runs `git clone --depth 1` with no branch, so it clones the default branch (today `main`), when the script is not a file beside `.agents/skills`. A checkout installs that checkout. Do not expect a pipe to carry a branch. The default clone URL works with no env vars; set `LOCAL_SKILLS_REPO_URL` only for a fork. Do not derive this repo from `GITHUB_REPOSITORY` in the installer—Actions sets that to the consuming repository.
 - The installer ignores a directory under `.agents/skills/` that has no `SKILL.md`. Do not add a skill folder without that file.
 - The copy excludes `.cache`, `.venv`, `.git`, and `__pycache__`. Do not commit those, and do not expect them after install.

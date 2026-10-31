@@ -2,7 +2,8 @@
 set -eu
 
 # Install skills from this repo into an agent skills directory.
-# Existing skill folders are left alone.
+# Re-running replaces skills from this source, removes stale skill
+# directories this layout previously installed, and leaves other paths alone.
 #
 #   ./install.sh
 #   ./install.sh ~/.cursor/skills
@@ -11,9 +12,6 @@ set -eu
 
 dest="${1:-$HOME/.agents/skills}"
 repo_url="https://github.com/nikolaybotev/local-skills.git"
-if [ -n "${LOCAL_SKILLS_REPO_URL:-}" ]; then
-  repo_url="$LOCAL_SKILLS_REPO_URL"
-fi
 tmp=""
 
 cleanup() {
@@ -70,8 +68,23 @@ dest=$(
 )
 
 installed=0
-skipped=0
+updated=0
+removed=0
 found=0
+
+tar_excludes='--exclude .cache --exclude .venv --exclude .git --exclude __pycache__'
+
+install_one() {
+  dir=$1
+  name=$2
+  target="$dest/$name"
+  if [ -d "$target" ]; then
+    rm -rf "$target"
+  fi
+  mkdir -p "$target"
+  # shellcheck disable=SC2086
+  tar -C "$dir" $tar_excludes -cf - . | tar -C "$target" -xf -
+}
 
 for dir in "$src"/*; do
   [ -d "$dir" ] || continue
@@ -79,21 +92,15 @@ for dir in "$src"/*; do
   found=1
   name=$(basename "$dir")
   target="$dest/$name"
-  if [ -e "$target" ]; then
-    echo "skip $name (already at $target)"
-    skipped=$((skipped + 1))
-    continue
+  if [ -d "$target" ]; then
+    install_one "$dir" "$name"
+    echo "updated $name -> $target"
+    updated=$((updated + 1))
+  else
+    install_one "$dir" "$name"
+    echo "installed $name -> $target"
+    installed=$((installed + 1))
   fi
-  mkdir -p "$target"
-  # Shell caches and virtualenvs are not part of the skill.
-  tar -C "$dir" \
-    --exclude .cache \
-    --exclude .venv \
-    --exclude .git \
-    --exclude __pycache__ \
-    -cf - . | tar -C "$target" -xf -
-  echo "installed $name -> $target"
-  installed=$((installed + 1))
 done
 
 if [ "$found" -eq 0 ]; then
@@ -101,4 +108,15 @@ if [ "$found" -eq 0 ]; then
   exit 1
 fi
 
-echo "done: $installed installed, $skipped skipped, destination $dest"
+for dir in "$dest"/*; do
+  [ -d "$dir" ] || continue
+  [ -f "$dir/SKILL.md" ] || continue
+  name=$(basename "$dir")
+  if [ ! -f "$src/$name/SKILL.md" ]; then
+    rm -rf "$dir"
+    echo "removed $name (no longer in source)"
+    removed=$((removed + 1))
+  fi
+done
+
+echo "done: $installed installed, $updated updated, $removed removed, destination $dest"

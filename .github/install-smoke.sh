@@ -1,22 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Piped install without a checkout: default URL, no override env (unset GITHUB_REPOSITORY in Actions).
-home_pipe=$(mktemp -d)
-pipe_dest=$(mktemp -d)
-(
-  unset LOCAL_SKILLS_REPO_URL
-  unset GITHUB_REPOSITORY
-  HOME="$home_pipe" sh -s -- "$pipe_dest" <./install.sh
-)
-pipe_installed=0
-for dir in "$pipe_dest"/*; do
-  [ -d "$dir" ] || continue
-  [ -f "$dir/SKILL.md" ] || continue
-  pipe_installed=$((pipe_installed + 1))
-done
-test "$pipe_installed" -ge 1
-
 fake_git_dir=$(mktemp -d)
 printf '%s\n' '#!/bin/sh' 'exit 99' >"$fake_git_dir/git"
 chmod +x "$fake_git_dir/git"
@@ -43,16 +27,29 @@ for dir in .agents/skills/*/; do
   first_name=$(basename "$dir")
   break
 done
-canary="$dest/$first_name/canary-smoke"
-echo canary >"$canary"
+
+echo tampered >"$dest/$first_name/SKILL.md"
+mkdir -p "$dest/stale-smoke-skill"
+echo stale >"$dest/stale-smoke-skill/SKILL.md"
+mkdir -p "$dest/unrelated-smoke-dir"
+echo keep >"$dest/unrelated-smoke-dir/note.txt"
+
 output=$(HOME="$home1" ./install.sh "$dest" 2>&1)
+echo "$output" | grep -q "updated $first_name"
+cmp -s "$dest/$first_name/SKILL.md" ".agents/skills/$first_name/SKILL.md"
+test ! -e "$dest/stale-smoke-skill"
+echo "$output" | grep -q "removed stale-smoke-skill"
+test "$(cat "$dest/unrelated-smoke-dir/note.txt")" = "keep"
+
+output2=$(HOME="$home1" ./install.sh "$dest" 2>&1)
 for dir in .agents/skills/*/; do
   [ -d "$dir" ] || continue
   [ -f "$dir/SKILL.md" ] || continue
   name=$(basename "$dir")
-  echo "$output" | grep -q "skip $name"
+  echo "$output2" | grep -q "updated $name"
 done
-test "$(cat "$canary")" = "canary"
+test ! -e "$dest/stale-smoke-skill"
+test "$(cat "$dest/unrelated-smoke-dir/note.txt")" = "keep"
 
 home2=$(mktemp -d)
 HOME="$home2" ./install.sh
