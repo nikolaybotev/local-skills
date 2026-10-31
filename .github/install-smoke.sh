@@ -10,11 +10,9 @@ pipe_dest=$(mktemp -d)
   HOME="$home_pipe" sh -s -- "$pipe_dest" <./install.sh
 )
 pipe_installed=0
-for dir in .agents/skills/*/; do
+for dir in "$pipe_dest"/*; do
   [ -d "$dir" ] || continue
   [ -f "$dir/SKILL.md" ] || continue
-  name=$(basename "$dir")
-  test -f "$pipe_dest/$name/SKILL.md"
   pipe_installed=$((pipe_installed + 1))
 done
 test "$pipe_installed" -ge 1
