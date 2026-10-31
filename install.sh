@@ -12,6 +12,9 @@ set -eu
 
 dest="${1:-$HOME/.agents/skills}"
 repo_url="https://github.com/nikolaybotev/local-skills.git"
+if [ -n "${LOCAL_SKILLS_REPO_URL:-}" ]; then
+  repo_url="$LOCAL_SKILLS_REPO_URL"
+fi
 tmp=""
 
 cleanup() {
@@ -92,7 +95,7 @@ for dir in "$src"/*; do
   found=1
   name=$(basename "$dir")
   target="$dest/$name"
-  if [ -d "$target" ]; then
+  if [ -e "$target" ]; then
     install_one "$dir" "$name"
     echo "updated $name -> $target"
     updated=$((updated + 1))

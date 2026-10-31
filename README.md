@@ -6,7 +6,7 @@ Each skill is a self-contained `SKILL.md` file that teaches the agent how to per
 
 ## Install
 
-Skills install into `~/.agents/skills`. A folder that is already there is skipped.
+Skills install into `~/.agents/skills`. Re-running into the same destination refreshes skills from the current source, removes skill directories there that no longer appear in the source, and leaves other paths alone.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/nikolaybotev/local-skills/main/install.sh | sh -s
