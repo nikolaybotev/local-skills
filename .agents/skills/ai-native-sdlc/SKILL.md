@@ -71,7 +71,7 @@ They correct you in conversation. Write the correction into the spec or the plan
 
 If two requirements contradict, split a first release from a later one and tag the later items. The spec did that for multi-currency.
 
-The spec wins over the plan. If the plan is the one that is right, change the spec first. During build, follow the installed **build-practices** skill for departures recorded in `plan.md`.
+The spec wins over the plan. If the plan is the one that is right, change the spec first. During build, follow the installed **build-practices** skill; record plan departures in `plan.md` as that skill requires.
 
 ## Last scrutiny, then the build
 
@@ -94,8 +94,7 @@ Hand a fresh-context subagent a chunk of the plan, not the design chat. Goldvalu
 
 The subagent works on its own. The prompt it was given:
 
-- Read `AGENTS.md`, `REVIEW.md`, load and follow the **build-practices** skill, the spec, and the plan, including deviations already recorded in `plan.md`.
-- Follow the **build-practices** skill; use this repo's `AGENTS.md` for commands and the required check names for merge.
+- Read `AGENTS.md`, `REVIEW.md`, load and follow the **build-practices** skill, the spec, and the plan, including deviations already recorded in `plan.md`. Use this repo's `AGENTS.md` for commands and the required check names for merge.
 - Do not ask questions. If something is undecidable, make the most conservative choice consistent with the spec, note it in `plan.md` under the phase, and continue.
 - Each pull request body lists the plan steps done and the definition-of-done evidence.
 - Update `AGENTS.md` as commands and conventions land.

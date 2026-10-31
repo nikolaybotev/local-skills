@@ -1,11 +1,10 @@
 ---
 name: build-practices
 description: >-
-  Shared rules for implementing code and docs in pull requests and for
-  reviewing build pull requests in any repo: writing rules, git workflow,
-  merge gate, spec vs plan during build, Cursor Cloud install script, layout,
-  and repository admin limits. Load and follow this skill during SDLC build
-  phases and when reviewing changes that land through pull requests.
+  Load for implementing code and docs in pull requests and for reviewing
+  build pull requests in any repo: writing rules, git workflow, merge gate,
+  spec vs plan during build, Cursor Cloud install boundaries, layout, and
+  repository admin limits. Also use during ai-native-sdlc build phases.
 ---
 
 # Build practices
@@ -16,7 +15,7 @@ Rules for implementing code, updating docs in pull requests, and reviewing those
 
 Rules 1 and 2 apply to every file the builder changes in a pull request. Rule 3 applies only to human-facing docs touched in that pull request.
 
-1. **No self-references.** In prose about the repo itself, say "this repo" instead of hardcoding owner, name, or URL. Distribution entry points may hardcode a canonical location: a curl-to-sh one-liner, an installer's default source URL, or another repo's dependency that pulls skills from here (optional fork override such as `LOCAL_SKILLS_REPO_URL`). References to other repos are fine. Never derive this repo's identity from `GITHUB_REPOSITORY` in scripts or workflows that other repos' CI may run—that variable names the consuming repository. Elsewhere in scripts and workflows, derive identity with `git remote` or the Actions `github.repository` context when appropriate.
+1. **No self-references.** In prose about the repo itself, say "this repo" instead of hardcoding owner, name, or URL. Distribution entry points may hardcode a canonical location: a curl-to-sh one-liner, an installer's default source URL, or another repo's dependency that pulls shared skills from the skills distribution repo (optional fork override such as `LOCAL_SKILLS_REPO_URL` on the published root `install.sh`). References to other repos are fine. Never derive this repo's identity from `GITHUB_REPOSITORY` in scripts or workflows that other repos' CI may run—that variable names the consuming repository. Elsewhere in scripts and workflows, derive identity with `git remote` or the Actions `github.repository` context when appropriate.
 2. **No values of variable config.** Do not copy the current value of a setting (for example who a signing certificate is issued to, or machine-specific paths) into docs, tests, or workflows. Refer to the setting by its name (the env var, secret, or config key). Tests check behavior against the configured value, not a literal.
 3. **Do not state the obvious (human-facing docs only).** In README, user docs, and setup docs, drop notes a competent reader already knows, such as a parenthetical that success means exit 0. Builders tend to add these; reviewers should cut them. Do not apply this rule to agent-facing files: root `AGENTS.md`, `REVIEW.md`, skills, or intents written for agents. Those files keep explicit expectations such as "(healthy: exit 0)" because they help smaller models.
 
