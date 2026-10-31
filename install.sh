@@ -35,7 +35,10 @@ esac
 # A checkout can install its own tree. A piped script has no tree, so clone.
 src=""
 if [ -f "$0" ]; then
-  script_dir=$(CDPATH= cd "$(dirname "$0")" && pwd)
+  script_dir=$(
+    CDPATH=
+    cd "$(dirname "$0")" && pwd
+  )
   if [ -d "$script_dir/.agents/skills" ]; then
     src="$script_dir/.agents/skills"
   fi
@@ -58,7 +61,10 @@ if [ ! -d "$src" ]; then
 fi
 
 mkdir -p "$dest"
-dest=$(CDPATH= cd "$dest" && pwd)
+dest=$(
+  CDPATH=
+  cd "$dest" && pwd
+)
 
 installed=0
 skipped=0
