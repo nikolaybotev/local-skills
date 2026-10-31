@@ -41,6 +41,9 @@ The Cursor Cloud Agent environment install command is the `~/.cursor/skills` lin
 ```
 local-skills/
 ├── README.md
+├── .github/
+│   └── workflows/
+│       └── test.yml  (.github/workflows/test.yml)
 └── .agents/
     └── skills/
         ├── ai-native-sdlc/
