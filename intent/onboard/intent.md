@@ -38,12 +38,11 @@ An agent opening the repo can read the cycle, the prohibitions that come from th
 None. The repo and the prompt settle the design. [spec.md](spec.md) records the decisions.
 
 ## Original prompt (redacted)
-  
-  > Bootstrap a Cursor Project for github.com/nikolaybotev/local-skills. Onboard per the ai-native-sdlc skill: write `AGENTS.md`, `REVIEW.md`, and a README update if needed; add `.github/workflows/test.yml` with shellcheck, an install smoke test into a temporary `HOME`, and SKILL.md frontmatter validation; work through spec, plan, fresh-context review, then build one phase per pull request. Squash-merge only when checks are green. Keep skills and docs generic, not written for one machine.
-  >
-  > **Already done.** Commit d006fc6 added `.cursor/environment.json`, `.cursor/install.sh`, and `.cursor/start.sh`. The repo is public. Merge is squash only, with delete branch on merge. Protected `main` requires pull requests, squash merge, signed commits, and linear history.
-  >
-  > **First task after onboarding.** Update the cursor-cloud-environments skill to distinguish inline-config environments (`POST /v1/environments`, snapshot only) from Config as code (committed `.cursor/environment.json` followed on launch). Prefer Config as code for new repos.
-  >
-  > **Standing limits.** Do not handle secrets or key material. Do not create rulesets, add required checks, dispatch workflows, cancel runs, or list secrets from automation.
-  
+
+> Bootstrap a Cursor Project for github.com/nikolaybotev/local-skills. Onboard per the ai-native-sdlc skill: write `AGENTS.md`, `REVIEW.md`, and a README update if needed; add `.github/workflows/test.yml` with shellcheck, an install smoke test into a temporary `HOME`, and SKILL.md frontmatter validation; work through spec, plan, fresh-context review, then build one phase per pull request. Squash-merge only when checks are green. Keep skills and docs generic, not written for one machine.
+>
+> **Already done.** Commit d006fc6 added `.cursor/environment.json`, `.cursor/install.sh`, and `.cursor/start.sh`. The repo is public. Merge is squash only, with delete branch on merge. Protected `main` requires pull requests, squash merge, signed commits, and linear history.
+>
+> **First task after onboarding.** Update the cursor-cloud-environments skill to distinguish inline-config environments (`POST /v1/environments`, snapshot only) from Config as code (committed `.cursor/environment.json` followed on launch). Prefer Config as code for new repos.
+>
+> **Standing limits.** Do not handle secrets or key material. Do not create rulesets, add required checks, dispatch workflows, cancel runs, or list secrets from automation.
