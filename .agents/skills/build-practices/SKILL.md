@@ -57,6 +57,19 @@ The published root `install.sh` in the skills repo is separate: a piped run defa
 - When the repo requires signed commits, sign them; do not bypass signing.
 - One writer per intent file at a time during design; do not run two sessions editing the same `spec.md` or `plan.md` concurrently.
 
+## Passing secrets to processes
+
+Rank how a tool should accept secrets, not how to scrape keys from running processes. Weakest to strongest:
+
+1. **Command-line arguments.** Weakest option. On macOS and Linux, any user on the machine can read another process's arguments with `ps`. Arguments also land in shell history, crash reports, and process monitoring. This is CWE-214. Do not accept a secret only as an argument. Example, as of 2026-10-31: the Cursor self-hosted agent worker takes its API key as `--api-key`, which is visible in `ps`—a design flaw to avoid, not a reason to inspect live workers for keys.
+2. **Environment variables and owner-only (0600) credential files.** Same tier, not two different strengths. Only the owning user or root can read them.
+   - On Linux, `/proc/<pid>/environ` is owner-only. On macOS, `ps -E` exposes the environment only for your own processes.
+   - Acceptable and common, including twelve-factor apps. Environment variables are inherited by child processes and can appear in crash dumps.
+   - Examples: credential files used by the gcloud and AWS CLIs.
+3. **OS keychain or secret store.** Strongest option. Encrypted at rest; access scoped per application. Example: pinentry-mac storing a GPG key passphrase in the macOS login keychain.
+
+Prefer a keychain or secret store. Otherwise read the secret from an environment variable or a 0600 file path. Never require it on the command line. If a CLI flag must exist for compatibility, also accept the environment variable or the file.
+
 ## Testing
 
 Four kinds of check:
