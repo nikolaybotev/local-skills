@@ -59,6 +59,8 @@ local-skills/
 │       └── test.yml  (.github/workflows/test.yml)
 └── .agents/
     └── skills/
+        ├── build-practices/
+        │   └── SKILL.md
         ├── ai-native-sdlc/
         │   ├── SKILL.md
         │   ├── assets/
