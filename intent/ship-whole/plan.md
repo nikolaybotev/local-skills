@@ -49,7 +49,7 @@ One commit. Splitting the three skill files would leave the old rule beside the 
 
 ### Build notes (Phase 0)
 
-DoD met: ship-whole inspection below on the Phase 0 commit; `shellcheck`, `install-smoke`, and `skill-frontmatter` exit 0.
+DoD met: ship-whole inspection below on the Phase 0 commit; `shellcheck`, `install-smoke`, and `skill-frontmatter` exit 0. Build review fix: history marks in parentheses, cut/stop/publish sentences, and extended inspection.
 
 DoD: the inspection below, run from the repo root on the Phase 0 commit. It exits non-zero when any check fails.
 
@@ -107,7 +107,9 @@ for needle in (
     "The parent does not review the diff and does not merge those pull requests.",
     "Skip it for a one-line fix or a typo.",
     "The Phase 5 check for two scheduled runs is that cron, not the push",
-    "The spec did that for multi-currency.",
+    "The spec did that for multi-currency",
+    "publishes nothing may land",
+    "as its own release may publish",
     "the next phase should not start",
     "should not publish until the remaining phases",
     "how publishing waits",
@@ -169,15 +171,29 @@ for needle in (
     "under the phase, and continue",
     "Do not ask questions.",
     "should take precedence",
+    "what closed",
+    "should not be treated as done",
+    "calculates or promises",
 ):
     need(prompt, needle, "subagent prompt")
+
+for needle in (
+    "future phase",
+    "what closed",
+    "should not be treated as done",
+    "calculates or promises",
+    "publishes nothing may land",
+    "as its own release may publish",
+    "this skill's rule",
+):
+    need(skill, needle, "SKILL.md")
 
 exc = line_with(skill, "usage limit", "SKILL.md")
 need(exc, "checks the plan names have succeeded", "usage-limit exception")
 sched = line_with(skill, "The Phase 5 check for two scheduled runs is that cron, not the push", "SKILL.md")
-need(sched, "history of that run, not the rule", "scheduled-runs line")
-multi = line_with(skill, "The spec did that for multi-currency.", "SKILL.md")
-need(multi, "history of that run, not the rule", "multi-currency line")
+need(sched, "(history of that run, not the rule)", "scheduled-runs line")
+multi = line_with(skill, "The spec did that for multi-currency", "SKILL.md")
+need(multi, "(history of that run, not the rule)", "multi-currency line")
 
 for needle in (
     "If something is undecidable",
