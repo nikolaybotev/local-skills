@@ -16,7 +16,7 @@ Reusable agent skills for local and cloud agents that read the Agent Skills layo
 ## Architecture
 
 - `.agents/skills/` — skill packages (`SKILL.md` plus scripts and references).
-- `install.sh` — copies skills from a checkout or a shallow clone into a destination directory.
+- `install.sh` — installs skills from a checkout or a shallow clone into a destination directory (staging swap on re-run for each repo skill).
 - `.cursor/` — Cloud Agent environment hooks (`environment.json`, `install.sh`, `start.sh`).
 - `intent/<change>/` — intent, spec, and plan for the active change (currently `intent/config-as-code/`). `intent/onboard/` is historical.
 - Root `AGENTS.md` and `REVIEW.md` — handbook and review guide for this repo (not the templates under `.agents/skills/ai-native-sdlc/assets/`).

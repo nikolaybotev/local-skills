@@ -68,6 +68,12 @@ for dir in .agents/skills/*/; do
 done
 test -f "$dest/extra-smoke-skill/SKILL.md"
 test "$(cat "$dest/unrelated-smoke-dir/note.txt")" = "keep"
+for dotdir in "$dest"/.[!.]* "$dest"/..?*; do
+  [ -e "$dotdir" ] || continue
+  case "$(basename "$dotdir")" in
+    *.install.*|*.previous.*) echo "leftover staging dir: $dotdir" >&2; exit 1 ;;
+  esac
+done
 
 home2=$(mktemp -d)
 HOME="$home2" ./install.sh

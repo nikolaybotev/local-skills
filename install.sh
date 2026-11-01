@@ -81,15 +81,31 @@ install_skill() {
   dir=$1
   name=$2
   target="$dest/$name"
+  if [ -e "$target" ] && [ ! -d "$target" ]; then
+    echo "error: destination exists and is not a directory: $target" >&2
+    exit 1
+  fi
   staging=$(mktemp -d "$dest/.${name}.install.XXXXXX")
   # shellcheck disable=SC2086
   tar -C "$dir" $tar_excludes -cf - . | tar -C "$staging" -xf -
+  if [ ! -f "$staging/SKILL.md" ]; then
+    rm -rf "$staging"
+    echo "error: failed to stage skill $name" >&2
+    exit 1
+  fi
   previous=""
   if [ -e "$target" ]; then
     previous=$(mktemp -d "$dest/.${name}.previous.XXXXXX")
     mv "$target" "$previous"
   fi
-  mv "$staging" "$target"
+  if ! mv "$staging" "$target"; then
+    if [ -n "$previous" ]; then
+      mv "$previous" "$target"
+    fi
+    rm -rf "$staging"
+    echo "error: failed to install skill $name" >&2
+    exit 1
+  fi
   if [ -n "$previous" ]; then
     rm -rf "$previous"
   fi
