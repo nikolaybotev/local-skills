@@ -45,6 +45,7 @@ for dir in .agents/skills/*/; do
 done
 
 echo tampered >"$dest/$first_name/SKILL.md"
+echo orphan-only >"$dest/$first_name/orphan-only.txt"
 mkdir -p "$dest/extra-smoke-skill"
 echo extra >"$dest/extra-smoke-skill/SKILL.md"
 mkdir -p "$dest/unrelated-smoke-dir"
@@ -53,9 +54,9 @@ echo keep >"$dest/unrelated-smoke-dir/note.txt"
 output=$(HOME="$home1" ./install.sh "$dest" 2>&1)
 echo "$output" | grep -q "updated $first_name"
 cmp -s "$dest/$first_name/SKILL.md" ".agents/skills/$first_name/SKILL.md"
+test ! -e "$dest/$first_name/orphan-only.txt"
 test -f "$dest/extra-smoke-skill/SKILL.md"
 test "$(cat "$dest/extra-smoke-skill/SKILL.md")" = "extra"
-echo "$output" | grep -vq "removed "
 test "$(cat "$dest/unrelated-smoke-dir/note.txt")" = "keep"
 
 output2=$(HOME="$home1" ./install.sh "$dest" 2>&1)

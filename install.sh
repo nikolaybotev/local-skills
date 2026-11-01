@@ -2,8 +2,9 @@
 set -eu
 
 # Install skills from this repo into an agent skills directory.
-# Re-running adds missing skills and overwrites skills from this source.
-# It does not delete anything in the destination.
+# Each skill from this source is copied to a staging folder beside the
+# destination, then swapped into place. Other paths in the destination are
+# not touched.
 #
 #   ./install.sh
 #   ./install.sh ~/.cursor/skills
@@ -76,12 +77,22 @@ found=0
 
 tar_excludes='--exclude .cache --exclude .venv --exclude .git --exclude __pycache__'
 
-copy_skill() {
+install_skill() {
   dir=$1
-  target=$2
-  mkdir -p "$target"
+  name=$2
+  target="$dest/$name"
+  staging=$(mktemp -d "$dest/.${name}.install.XXXXXX")
   # shellcheck disable=SC2086
-  tar -C "$dir" $tar_excludes -cf - . | tar -C "$target" -xf -
+  tar -C "$dir" $tar_excludes -cf - . | tar -C "$staging" -xf -
+  previous=""
+  if [ -e "$target" ]; then
+    previous=$(mktemp -d "$dest/.${name}.previous.XXXXXX")
+    mv "$target" "$previous"
+  fi
+  mv "$staging" "$target"
+  if [ -n "$previous" ]; then
+    rm -rf "$previous"
+  fi
 }
 
 for dir in "$src"/*; do
@@ -91,11 +102,11 @@ for dir in "$src"/*; do
   name=$(basename "$dir")
   target="$dest/$name"
   if [ -e "$target" ]; then
-    copy_skill "$dir" "$target"
+    install_skill "$dir" "$name"
     echo "updated $name -> $target"
     updated=$((updated + 1))
   else
-    copy_skill "$dir" "$target"
+    install_skill "$dir" "$name"
     echo "installed $name -> $target"
     installed=$((installed + 1))
   fi
