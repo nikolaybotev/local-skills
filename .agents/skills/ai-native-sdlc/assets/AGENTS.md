@@ -14,6 +14,7 @@
 ## Conventions
 
 - For build and build-review, load and follow the installed **build-practices** skill; do not copy its text into this repo.
+- Default ways of working and approval: <ai-native or ad-hoc>, <autonomous or hil>. See the ai-native-sdlc skill.
 - <Repo-specific conventions. Point at `intent/<change>/` when this product uses the SDLC chain.>
 
 ## Architecture

@@ -22,9 +22,45 @@ A disciplined way for one person to build software with an agent. Each stage end
 1. **Bootstrap.** First commit: `AGENTS.md`, `REVIEW.md`, `README.md`, and `intent/<change>/` with the verbatim prompt plus draft `spec.md` and `plan.md`. Questions may still be open.
 2. **Spec and plan.** Iterate both in the chat. Corrections become decisions and plan steps. Commit each draft. Check facts before they harden. Leave a question open until it is answered or shelved.
 3. **Independent review, then the build gate.** A fresh-context subagent reads the spec against the intent, then another reads the plan against the spec. Apply the findings. The build starts when they say to build and nothing still needs them.
-4. **Build.** A fresh-context subagent takes a chunk of phases. Each phase is one pull request when that phase is whole. The subagent should still be the one that merges. After its steps and definition of done are met and the checks the plan names have succeeded, including when the repo names no required check, it merges that pull request. A failed, cancelled, or still-running check is not a stop; the phase should not merge and the next phase should not start until the check is fixed and re-run. The release should not publish until the remaining phases of that change have landed; the plan should say how publishing waits in that repo. A phase that publishes nothing may land. A release the plan sequences as its own release may publish. The parent reports what landed and launches the next chunk.
+4. **Build.** A fresh-context subagent takes a chunk of phases. Each phase is one pull request when that phase is whole. The subagent should still be the one that merges. After its steps and definition of done are met, the checks the plan names have succeeded (including when the repo names no required check), and the approvals its mode needs are in (see [Ways of working and approval modes](#ways-of-working-and-approval-modes)), it merges that pull request. A failed, cancelled, or still-running check is not a stop; the phase should not merge and the next phase should not start until the check is fixed and re-run. The release should not publish until the remaining phases of that change have landed; the plan should say how publishing waits in that repo. A phase that publishes nothing may land. A release the plan sequences as its own release may publish. The parent reports what landed and launches the next chunk.
 
 A later idea starts again at 1 in a new `intent/<change>/`. The sections below are the detail for these four. Do not treat this list as a second procedure.
+
+## Ways of working and approval modes
+
+Two separate choices apply to every pull request. Pick one from each; any combination works.
+
+How the work is done:
+
+- **ai-native**: the full cycle in this skill: intent, spec, plan, review, then build, one phase per pull request.
+- **ad-hoc**: one pull request for one standalone change, with no `intent/` folder. Use it for fixes, small edits and housekeeping that don't need a spec.
+
+Who has to approve before merge:
+
+- **autonomous**: one approval from a fresh-context review agent is awaited before merge.
+- **hil** (human in the loop): the review agent's approval and a named person's approval are both awaited before merge.
+
+A repo should state its default for each choice in `AGENTS.md`. If it states none, use ai-native and autonomous. Any single pull request can be switched to hil.
+
+### Asking for hil
+
+One instruction is enough: "request and await hil review and approval before merging". The pull request's author then requests that person's review on the pull request, waits for both approvals after its latest push, and merges.
+
+A branch protection rule that requires approvals is not needed for this and should not be used for it, because it would also hold every autonomous pull request. The open review request shows that the pull request is waiting.
+
+### Review agent approval
+
+After opening a pull request, the author starts a separate fresh-context review agent. It reviews against `REVIEW.md` and posts its findings on the pull request. The author fixes them on the same pull request. The review agent's approval is a review, or a comment saying the change looks good, made after the author's latest push. A review after the merge should not stand in for it.
+
+### Merging
+
+- The pull request's author merges it. There is no separate merge role.
+- It merges once its mode's approvals are in and the required checks have passed. A running, failed or cancelled check has not passed.
+- An ai-native build phase also follows the phase and publishing rules in [Build](#build).
+
+### Feedback
+
+A pull request should not be closed in response to review feedback, and closing should not be offered as a fix. Feedback is handled by revising the same open pull request, with new commits or, when its history has to change, a force-push to its branch.
 
 ## Small intent
 
@@ -117,6 +153,7 @@ The subagent works on its own. The prompt it was given:
 - Text that acceptance will match exactly should enter the spec in that same commit. A procedure fix that does not contradict the spec should be recorded in the plan only. A commit that mixes a fix with a new requirement, or with a rewrite of a settled claim, should split, and the new part should point at the existing new-intent sentence.
 - When the remainder has landed, or when a cut leaves nothing to ship, set Status to Finished on `intent.md`, `spec.md`, and `plan.md`. A superseded step should stop reading as an order. The build note should name which definition of done was met. A session-start line naming the current change, such as in `AGENTS.md`, should be updated in that same change. A settled cut should not stay in the open-questions list.
 - Each pull request body lists the plan steps done and the definition-of-done evidence.
+- After opening each pull request, start its review agent and wait for the approvals its mode needs, as in [Ways of working and approval modes](#ways-of-working-and-approval-modes).
 - Update `AGENTS.md` as commands and conventions land.
 - Reply with the merged pull request numbers, CI status, deviations recorded, and anything that needs the owner.
 
@@ -136,4 +173,4 @@ A new idea starts at [Prompt to first commit](#prompt-to-first-commit) in a new 
 
 ## Commit
 
-Commit each draft and each finished phase. Do not commit secrets, caches, or generated build output. Do not force-push. The artifacts describe the product. They do not narrate how the previous draft was edited.
+Commit each draft and each finished phase. Do not commit secrets, caches, or generated build output. Do not force-push the default branch. On an open pull request, force-push only when its history has to change. The artifacts describe the product. They do not narrate how the previous draft was edited.
