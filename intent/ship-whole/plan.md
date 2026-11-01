@@ -241,15 +241,20 @@ if block_lines != ["### Build notes (Phase 0)", "<name which definition of done 
 if "A phase that is not yet built has no build notes." not in templates[fence:]:
     die("templates.md moved the not-yet-built line inside the fence")
 
-g8 = line_with(gold, "Each phase was one PR with a definition of done", "goldvalue.md")
-depart = g8.find("Departures are in that phase's build notes inside `plan.md`")
-commands = g8.find("gained the commands and the pitfalls in the same changes.")
-mark = g8.find("history of that run, not the rule")
-if depart < 0 or commands < 0 or not (depart < mark < commands):
-    die("item 8 history mark is not on the departures clause")
-g9 = line_with(gold, "from the same intent folder", "goldvalue.md")
-need(g9, "history of that run, not the rule", "item 9")
-need(g9, "already sequences", "item 9")
+g8live = line_with(gold, "Each phase was one PR with a definition of done", "goldvalue.md")
+if "gained the commands and the pitfalls in the same changes." not in g8live:
+    die("item 8 live commands sentence missing")
+depart_line = line_with(gold, "Departures are in that phase's build notes inside `plan.md`", "goldvalue.md")
+if "(history of that run, not the rule)" not in depart_line:
+    die("item 8 departures history missing")
+if gold.find(g8live) > gold.find(depart_line):
+    die("item 8 history paragraph precedes live sentences")
+g9live = line_with(gold, "A release this same plan already sequences should stay on this intent", "goldvalue.md")
+hist9 = line_with(gold, "from the same intent folder", "goldvalue.md")
+need(hist9, "(history of that run, not the rule)", "item 9")
+if gold.find(g9live) > gold.find(hist9):
+    die("item 9 history paragraph precedes live sentence")
+need(gold, "PR 15 then PR 16", "goldvalue.md")
 need(gold, "restarted the cycle", "goldvalue.md")
 
 base_skill = show("7e7c572", ".agents/skills/ai-native-sdlc/SKILL.md")
