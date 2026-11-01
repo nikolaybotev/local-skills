@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Implements | [spec.md](spec.md) Draft 2 |
+| Implements | [spec.md](spec.md) Draft 3 |
 | Status | Draft 1 |
 | Stage | 3 · Build |
 
@@ -12,7 +12,7 @@ This commit is the revised spec and this plan. It is not Phase 0. Phase 0 is the
 
 ## Stops
 
-None. The open questions in [intent.md](intent.md) are closed. A failed check in Phase 0 is not a stop.
+None. The open questions in [intent.md](intent.md) are closed. A failed, cancelled, or still-running check in Phase 0 is not a stop.
 
 ## Publishing
 
@@ -37,13 +37,13 @@ None. The open questions in [intent.md](intent.md) are closed. A failed check in
 
 Files: `.agents/skills/ai-native-sdlc/SKILL.md`, `.agents/skills/ai-native-sdlc/references/templates.md`, `.agents/skills/ai-native-sdlc/references/goldvalue.md`, `README.md`, `AGENTS.md`, `intent/ship-whole/intent.md`, `intent/ship-whole/spec.md`, `intent/ship-whole/plan.md`
 
-One commit. Splitting the three skill files would leave the old rule beside the new one.
+One commit. Splitting the three skill files would leave the old rule beside the new one. Read `README.md` and `AGENTS.md` before editing them.
 
-1. Edit `SKILL.md` to FR3–FR10 and FR13–FR14. Keep the sentences FR3 lists. The description should say `when that phase is whole`. Summary item 4 should not keep `The subagent merges it when CI is green`. The build bullet should not keep `under the phase, and continue`. The iterate section should not keep `tag the later items`. Mark the deploy paragraph, the scheduled-runs sentence, and the multi-currency sentence with `history of that run, not the rule`. The subagent prompt should carry the same-commit amendment and the three moves.
-2. Edit `references/templates.md` to FR2, FR11, and FR15. The two placeholders should say "should". Show `| Status | Finished |` as the closed header, and keep Draft as the start. The named cut should include `what closed`. The copyable build-notes block should not contain `Added only after the phase lands`.
-3. Edit `references/goldvalue.md` so item 8's plan-note pattern and item 9's same-folder second version are each marked `history of that run, not the rule`. Leave the new-folder item in place.
+1. Edit `SKILL.md` to FR3–FR10 and FR13–FR14. Keep the sentences FR3 lists, including `Do not ask questions.` and the parent sentence. On the description line that says `builds one pull request per phase`, add `when that phase is whole`. Keep `**Build.**` on summary item 4, and that line should say `when that phase is whole`, `no required check`, and `not a stop`. It should not keep `The subagent merges it when CI is green`. The subagent should still be the one that merges. The build bullet should keep `under the phase, and continue` for a detail the spec does not decide, and it should not keep `If something is undecidable`. Put `cancelled`, `still-running`, `not a stop`, and `the next phase should not start` on one line. A wrong locked formula is an FR5 amendment in that same commit. The prompt between `The prompt it was given:` and `The parent does not review` should contain `keeps the goals`, `drops a goal`, `mistaken cut`, and the sentence that the whole-phase rule, the release wait, and the three moves should take precedence. Keep `The spec wins over the plan.` and `If the plan is the one that is right, change the spec first.` The clause `record plan departures in` should not remain. The usage-limit exception should stay, `usage limit` should remain, and `was green` should become `checks the plan names have succeeded`. Replace the deploy instruction so `waits for that run and checks production` does not remain. Mark the scheduled-runs sentence and `The spec did that for multi-currency.` with `history of that run, not the rule` on those same lines. The iterate section should not keep `tag the later items`.
+2. Edit `references/templates.md` to FR2, FR11, and FR15. The constraints placeholder should be `What should stay true`. The open-questions placeholder should say `spec should answer`. Show `| Status | Finished |` as the closed header, and keep Draft as the start. The named cut should include `what closed` and `new-intent sentence`. The stay sentence should include `staying is not an exemption from a recorded cut`. The copyable build-notes block should hold `### Build notes (Phase 0)` and `<name which definition of done was met>`, and it should not contain `Added only after the phase lands`. The line `A phase that is not yet built has no build notes.` should stay outside that fence.
+3. Edit `references/goldvalue.md` so the clause `Departures are in that phase's build notes inside `plan.md`` is marked `history of that run, not the rule`, after that clause and before ``AGENTS.md` gained the commands and the pitfalls in the same changes.` Keep `Each phase was one PR with a definition of done` as the rule. On the line that says `from the same intent folder`, add the history mark and say a release this same plan already sequences is not forbidden. Keep `restarted the cycle` on the following item.
 4. In `README.md`, change only the ai-native-sdlc blurb so it says `when that phase is whole` and does not say `when CI is green`.
-5. In the same commit, set Status to `Finished` on `intent/ship-whole/intent.md`, `spec.md`, and `plan.md`. Leave the stage labels. Add a build note whose first line is `DoD met:` and name the inspection below. Update the two `AGENTS.md` sentences that call `intent/config-as-code/` the active change so they name `intent/ship-whole/` as Finished and do not call either folder the open current change. Leave `intent/onboard/` historical. Leave the rest of `AGENTS.md` and `README.md` as they are.
+5. In the same commit, set the first `| Status |` row to `Finished` on `intent/ship-whole/intent.md`, `spec.md`, and `plan.md`. Leave the stage labels. Add a build note whose first line is `DoD met:` and name the inspection below. Rewrite the preamble so it does not say `It is not Phase 0` and so it says the steps are `history of that run, not orders`. Prefix each of the lines `1.` through `7.` with the done mark FR13 names. Change only the `AGENTS.md` line that says `The current change is documented`, so it names `intent/ship-whole/` as Finished. Leave the architecture line, including a historical `intent/config-as-code/` mention, and leave `intent/onboard/` historical. Leave the rest of `AGENTS.md` and `README.md` as they are.
 6. Run the definition of done on that commit. It should exit 0. The worktree should be clean.
 7. Merge only after `shellcheck`, `install-smoke`, and `skill-frontmatter` have succeeded. If one of those jobs has failed, was cancelled, or is still running, the phase should not merge and the next phase should not start. Fix and re-run. That is not an owner stop. The subagent should merge. The parent should not merge that pull request.
 
@@ -51,7 +51,8 @@ DoD: the inspection below, run from the repo root on the Phase 0 commit. It exit
 
 ```sh
 python3 - << 'PY'
-import pathlib, re, subprocess, sys
+import difflib, pathlib, re, subprocess, sys
+from collections import Counter
 
 def die(msg):
     print(msg, file=sys.stderr)
@@ -67,6 +68,23 @@ intent = (root / "intent/ship-whole/intent.md").read_text()
 spec = (root / "intent/ship-whole/spec.md").read_text()
 plan = (root / "intent/ship-whole/plan.md").read_text()
 
+def show(rev, path):
+    return subprocess.check_output(["git", "show", f"{rev}:{path}"], text=True)
+
+def need(text, needle, where):
+    if needle not in text:
+        die(where + " missing: " + needle)
+
+def ban(text, needle, where):
+    if needle in text:
+        die(where + " still has: " + needle)
+
+def line_with(text, needle, where):
+    hits = [ln for ln in text.splitlines() if needle in ln]
+    if len(hits) != 1:
+        die(where + " expected one line for: " + needle)
+    return hits[0]
+
 intent_src = intent
 m = re.search(r"should not contain ([A-Z]{3,}), ([A-Z]{3,}), or ([A-Z]{3,})", intent_src)
 if not m:
@@ -78,14 +96,14 @@ for path, text in (
 ):
     for word in m.groups():
         if re.search(r"\b" + word + r"\b", text, re.I):
-            die(f"{path} contains a word the intent constraints forbid")
+            die(path + " contains a word the intent constraints forbid")
 
-need_skill = [
+for needle in (
     "Do not ask questions.",
     "The parent does not review the diff and does not merge those pull requests.",
     "Skip it for a one-line fix or a typo.",
     "The Phase 5 check for two scheduled runs is that cron, not the push",
-    "multi-currency",
+    "The spec did that for multi-currency.",
     "the next phase should not start",
     "should not publish until the remaining phases",
     "how publishing waits",
@@ -95,75 +113,262 @@ need_skill = [
     "drops a goal",
     "no required check",
     "owner check",
-    "A later idea starts again at 1 in a new `intent/<change>/`.",
-    "A new idea starts at [Prompt to first commit](#prompt-to-first-commit) in a new `intent/<slug>/` that links to the folder it builds on.",
+    "staying is not an exemption from a recorded cut",
+    "acceptance will match exactly",
+    "recorded in the plan only",
+    "should split",
+    "land with the surface that uses it",
+    "settled cut",
+    "set Status to Finished",
+    "The subagent should still be the one that merges.",
+    "its own intent",
+    "A merge onto the branch that runs the publish job is a publish.",
+    "holding that merge",
+    "changing the job in the same change",
+    "Accepting the automatic tag is not a wait.",
+    "The spec wins over the plan.",
+    "If the plan is the one that is right, change the spec first.",
+):
+    need(skill, needle, "SKILL.md")
+
+if skill.count("starts again at 1") != 1:
+    die("SKILL.md new-intent sentence should appear once")
+if skill.count("A new idea starts at") != 1:
+    die("SKILL.md next-change sentence should appear once")
+
+fm = skill.split("\n---\n", 1)[0]
+need(fm, "when that phase is whole", "description")
+item4 = [ln for ln in skill.splitlines() if "**Build.**" in ln and "when that phase is whole" in ln]
+if len(item4) != 1 or "no required check" not in item4[0] or "not a stop" not in item4[0]:
+    die("summary item 4 does not carry the whole-phase rule")
+if "when CI is green" in item4[0]:
+    die("summary item 4 still merges when CI is green")
+
+failed = [
+    ln for ln in skill.splitlines()
+    if all(s in ln for s in ("cancelled", "still-running", "not a stop", "the next phase should not start"))
 ]
-for s in need_skill:
-    if s not in skill:
-        die(f"SKILL.md missing: {s}")
-if skill.count("when that phase is whole") < 2:
-    die("SKILL.md should say when that phase is whole in the description and the summary")
-if skill.count("history of that run, not the rule") < 2:
-    die("SKILL.md history mark missing on the deploy paragraph or the multi-currency sentence")
-for s in (
+if not failed:
+    die("failed-check rule is not one sentence")
+
+start = skill.find("The prompt it was given:")
+end = skill.find("The parent does not review")
+if start < 0 or end <= start:
+    die("subagent prompt markers missing")
+prompt = skill[start:end]
+for needle in (
+    "keeps the goals",
+    "drops a goal",
+    "mistaken cut",
+    "the spec does not decide",
+    "wrong locked formula",
     "under the phase, and continue",
+    "Do not ask questions.",
+    "should take precedence",
+):
+    need(prompt, needle, "subagent prompt")
+
+exc = line_with(skill, "usage limit", "SKILL.md")
+need(exc, "checks the plan names have succeeded", "usage-limit exception")
+sched = line_with(skill, "The Phase 5 check for two scheduled runs is that cron, not the push", "SKILL.md")
+need(sched, "history of that run, not the rule", "scheduled-runs line")
+multi = line_with(skill, "The spec did that for multi-currency.", "SKILL.md")
+need(multi, "history of that run, not the rule", "multi-currency line")
+
+for needle in (
+    "If something is undecidable",
     "tag the later items",
     "The subagent merges it when CI is green",
+    "was green",
+    "waits for that run and checks production",
+    "record plan departures in",
 ):
-    if s in skill:
-        die(f"SKILL.md still has: {s}")
+    ban(skill, needle, "SKILL.md")
 
-for s in (
+for needle in (
     "What should stay true",
     "spec should answer",
     "| Status | Finished |",
     "no required check",
     "what closed",
+    "new-intent sentence",
     "same commit",
     "drops a goal",
+    "recorded in the plan only",
+    "staying is not an exemption from a recorded cut",
+    "settled cut",
 ):
-    if s not in templates:
-        die(f"templates.md missing: {s}")
+    need(templates, needle, "templates.md")
 if templates.count("stay true") != 1:
     die("templates.md constraints placeholder was not the only stay-true line")
-for s in (
+for needle in (
     "Later-release items tagged",
     "tagged as later",
     "untagged requirements belong",
     "Added only after the phase lands",
 ):
-    if s in templates:
-        die(f"templates.md still has: {s}")
+    ban(templates, needle, "templates.md")
 
-if gold.count("history of that run, not the rule") < 2:
-    die("goldvalue.md should mark item 8 and item 9")
-if "smoothed-gold" not in gold:
-    die("goldvalue.md new-folder item missing")
+notes_at = templates.find("### Build notes (Phase 0)")
+if notes_at < 0:
+    die("templates.md build notes heading missing")
+fence = templates.find("```", notes_at)
+if fence < 0:
+    die("templates.md build notes fence missing")
+block_lines = [ln.strip() for ln in templates[notes_at:fence].splitlines() if ln.strip()]
+if block_lines != ["### Build notes (Phase 0)", "<name which definition of done was met>"]:
+    die("templates.md build notes fence should hold the heading and the named placeholder")
+if "A phase that is not yet built has no build notes." not in templates[fence:]:
+    die("templates.md moved the not-yet-built line inside the fence")
 
-blurb = next((line for line in readme.splitlines() if "ai-native-sdlc" in line and line.strip().startswith("-")), "")
-if "when that phase is whole" not in blurb or "when CI is green" in blurb:
+g8 = line_with(gold, "Each phase was one PR with a definition of done", "goldvalue.md")
+depart = g8.find("Departures are in that phase's build notes inside `plan.md`")
+commands = g8.find("gained the commands and the pitfalls in the same changes.")
+mark = g8.find("history of that run, not the rule")
+if depart < 0 or commands < 0 or not (depart < mark < commands):
+    die("item 8 history mark is not on the departures clause")
+g9 = line_with(gold, "from the same intent folder", "goldvalue.md")
+need(g9, "history of that run, not the rule", "item 9")
+need(g9, "already sequences", "item 9")
+need(gold, "restarted the cycle", "goldvalue.md")
+
+base_skill = show("7e7c572", ".agents/skills/ai-native-sdlc/SKILL.md")
+base_templates = show("7e7c572", ".agents/skills/ai-native-sdlc/references/templates.md")
+base_gold = show("7e7c572", ".agents/skills/ai-native-sdlc/references/goldvalue.md")
+
+def skill_editable(text):
+    idx = set()
+    needles = (
+        "builds one pull request per phase",
+        "The subagent merges it when CI is green",
+        "tag the later items",
+        "If something is undecidable",
+        "was green",
+        "waits for that run and checks production",
+        "record plan departures in",
+    )
+    for i, ln in enumerate(text.splitlines()):
+        if any(needle in ln for needle in needles):
+            idx.add(i)
+    return idx
+
+def following_line(lines, header):
+    for i, ln in enumerate(lines):
+        if ln.strip() == header:
+            for j in range(i + 1, len(lines)):
+                if lines[j].strip():
+                    return j
+    return None
+
+def templates_editable(text):
+    lines = text.splitlines()
+    idx = set()
+    for header in ("## Constraints and principles", "## Open questions (carried into spec.md)"):
+        j = following_line(lines, header)
+        if j is None:
+            die("templates baseline missing " + header)
+        idx.add(j)
+    needles = (
+        "tagged as later",
+        "untagged requirements belong",
+        "Later-release items tagged",
+        "whenever implementation departs",
+        "exits non-zero on failure",
+        "Added only after the phase lands",
+    )
+    for i, ln in enumerate(lines):
+        if any(needle in ln for needle in needles):
+            idx.add(i)
+    return idx
+
+def gold_editable(text):
+    idx = set()
+    for i, ln in enumerate(text.splitlines()):
+        if (
+            "Departures are in that phase's build notes inside `plan.md`" in ln
+            or "from the same intent folder" in ln
+        ):
+            idx.add(i)
+    return idx
+
+def assert_untouched(base, new, editable, where):
+    bl = base.splitlines()
+    kept = Counter(bl[i] for i in range(len(bl)) if i not in editable and bl[i].strip())
+    got = Counter(ln for ln in new.splitlines() if ln.strip())
+    for ln, count in kept.items():
+        if got[ln] != count:
+            die(where + " untouched line changed: " + ln[:140])
+
+skill_idx = skill_editable(base_skill)
+template_idx = templates_editable(base_templates)
+gold_idx = gold_editable(base_gold)
+if len(skill_idx) < 7 or len(template_idx) < 7 or len(gold_idx) != 2:
+    die("baseline edit lines not found")
+assert_untouched(base_skill, skill, skill_idx, "SKILL.md")
+assert_untouched(base_templates, templates, template_idx, "templates.md")
+assert_untouched(base_gold, gold, gold_idx, "goldvalue.md")
+
+log = subprocess.check_output(["git", "log", "--format=%H%x09%s"], text=True)
+rev = ""
+for row in log.splitlines():
+    sha, subject = row.split("\t", 1)
+    if subject == "docs: apply the ship-whole plan review":
+        rev = sha
+        break
+if not rev:
+    die("plan revision commit not found")
+
+def line_changes(old, new):
+    removed, added = [], []
+    for row in difflib.ndiff(old.splitlines(), new.splitlines()):
+        if row.startswith("- "):
+            removed.append(row[2:])
+        elif row.startswith("+ "):
+            added.append(row[2:])
+    return removed, added
+
+readme_removed, readme_added = line_changes(show(rev, "README.md"), readme)
+if len(readme_removed) != 1 or len(readme_added) != 1:
+    die("README.md changed more than the skill blurb")
+if "ai-native-sdlc" not in readme_removed[0] or "when CI is green" not in readme_removed[0]:
+    die("README.md changed a different line")
+if (
+    "ai-native-sdlc" not in readme_added[0]
+    or "when that phase is whole" not in readme_added[0]
+    or "when CI is green" in readme_added[0]
+):
     die("README blurb does not match the whole-phase rule")
 
-if "intent/config-as-code/" in agents:
-    die("AGENTS.md still names config-as-code as a path")
-if "intent/ship-whole/" not in agents or "Finished" not in agents:
-    die("AGENTS.md does not name this intent as Finished")
-if "intent/onboard/" not in agents:
-    die("AGENTS.md dropped the onboard history note")
+agents_removed, agents_added = line_changes(show(rev, "AGENTS.md"), agents)
+if len(agents_removed) != 1 or len(agents_added) != 1:
+    die("AGENTS.md changed more than the current-change line")
+if "The current change is documented" not in agents_removed[0]:
+    die("AGENTS.md changed a different line")
+if "intent/ship-whole/" not in agents_added[0] or "Finished" not in agents_added[0]:
+    die("current-change line does not name this intent as Finished")
+need(agents, "intent/onboard/", "AGENTS.md")
 
 for label, text in (("intent.md", intent), ("spec.md", spec), ("plan.md", plan)):
-    if "| Status | Finished |" not in text:
-        die(f"{label} status is not Finished")
+    status = re.search(r"(?m)^\| Status \| ([^|]+) \|", text)
+    if not status or status.group(1).strip() != "Finished":
+        die(label + " status row is not Finished")
 if not any(line.startswith("DoD met:") for line in plan.splitlines()):
     die("plan.md has no DoD met line")
+
+preamble = plan.split("## Stops", 1)[0]
+if "It is not Phase 0" in preamble:
+    die("preamble still says this commit is not Phase 0")
+need(preamble, "history of that run, not orders", "plan preamble")
+steps = plan.split("## Phase 0", 1)[1].split("DoD: the inspection", 1)[0]
+for n in range(1, 8):
+    hits = [ln for ln in steps.splitlines() if re.match(r"^" + str(n) + r"\. ", ln)]
+    if len(hits) != 1 or "Done." not in hits[0]:
+        die("step " + str(n) + " still reads as an order")
 
 status = subprocess.check_output(["git", "status", "--porcelain"], text=True)
 if status.strip():
     die("worktree is not clean")
-names = subprocess.check_output(
-    ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"],
-    text=True,
-).split()
+
 allowed = {
     ".agents/skills/ai-native-sdlc/SKILL.md",
     ".agents/skills/ai-native-sdlc/references/templates.md",
@@ -174,11 +379,22 @@ allowed = {
     "intent/ship-whole/spec.md",
     "intent/ship-whole/plan.md",
 }
-extra = sorted(set(names) - allowed)
-if extra:
-    die("unexpected paths: " + ", ".join(extra))
-if not names:
-    die("HEAD commit has no files")
+commits = subprocess.check_output(["git", "rev-list", rev + "..HEAD"], text=True).split()
+if not commits:
+    die("no Phase 0 commit")
+seen = set()
+for commit in commits:
+    names = subprocess.check_output(
+        ["git", "diff", "--name-only", commit + "^", commit],
+        text=True,
+    ).split()
+    extra = sorted(set(names) - allowed)
+    if extra:
+        die("unexpected paths: " + ", ".join(extra))
+    seen.update(names)
+missing = sorted(allowed - seen)
+if missing:
+    die("Phase 0 change missing: " + ", ".join(missing))
 print("ship-whole inspection ok")
 PY
 ```
