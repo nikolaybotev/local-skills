@@ -24,7 +24,7 @@ Reusable agent skills for local and cloud agents that read the Agent Skills layo
 ## Things agents get wrong
 
 - Do not run `install.sh` or `.cursor/install.sh` against a real `$HOME`. An explicit destination applies only to `install.sh`. `.cursor/install.sh` takes no destination. It always runs the root installer into `${HOME}/.cursor/skills-cursor`. For `.cursor/install.sh`, the only safe use is a temporary `HOME`. The default destination of `install.sh` is `$HOME/.agents/skills`.
-- Re-running `install.sh` into the same destination adds missing skills from the current source and overwrites skills that come from this repo. It does not delete skill folders, files, or unrelated paths in the destination.
+- Re-running `install.sh` into the same destination adds missing skills from the current source and replaces each repo skill directory with the repo copy (staging beside the destination, then swap). Skills and paths that are not in this repo are left alone.
 - A piped install runs `git clone --depth 1` with no branch, so it clones the default branch (today `main`), when the script is not a file beside `.agents/skills`. A checkout installs that checkout. Do not expect a pipe to carry a branch. The default clone URL works with no env vars; set `LOCAL_SKILLS_REPO_URL` only for a fork. Do not derive this repo from `GITHUB_REPOSITORY` in the installer—Actions sets that to the consuming repository.
 - The installer ignores a directory under `.agents/skills/` that has no `SKILL.md`. Do not add a skill folder without that file.
 - The copy excludes `.cache`, `.venv`, `.git`, and `__pycache__`. Do not commit those, and do not expect them after install.
