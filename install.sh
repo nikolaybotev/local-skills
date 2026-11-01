@@ -2,8 +2,8 @@
 set -eu
 
 # Install skills from this repo into an agent skills directory.
-# Re-running replaces skills from this source, removes stale skill
-# directories this layout previously installed, and leaves other paths alone.
+# Re-running adds missing skills and overwrites skills from this source.
+# It does not delete anything in the destination.
 #
 #   ./install.sh
 #   ./install.sh ~/.cursor/skills
@@ -72,18 +72,13 @@ dest=$(
 
 installed=0
 updated=0
-removed=0
 found=0
 
 tar_excludes='--exclude .cache --exclude .venv --exclude .git --exclude __pycache__'
 
-install_one() {
+copy_skill() {
   dir=$1
-  name=$2
-  target="$dest/$name"
-  if [ -d "$target" ]; then
-    rm -rf "$target"
-  fi
+  target=$2
   mkdir -p "$target"
   # shellcheck disable=SC2086
   tar -C "$dir" $tar_excludes -cf - . | tar -C "$target" -xf -
@@ -96,11 +91,11 @@ for dir in "$src"/*; do
   name=$(basename "$dir")
   target="$dest/$name"
   if [ -e "$target" ]; then
-    install_one "$dir" "$name"
+    copy_skill "$dir" "$target"
     echo "updated $name -> $target"
     updated=$((updated + 1))
   else
-    install_one "$dir" "$name"
+    copy_skill "$dir" "$target"
     echo "installed $name -> $target"
     installed=$((installed + 1))
   fi
@@ -111,15 +106,4 @@ if [ "$found" -eq 0 ]; then
   exit 1
 fi
 
-for dir in "$dest"/*; do
-  [ -d "$dir" ] || continue
-  [ -f "$dir/SKILL.md" ] || continue
-  name=$(basename "$dir")
-  if [ ! -f "$src/$name/SKILL.md" ]; then
-    rm -rf "$dir"
-    echo "removed $name (no longer in source)"
-    removed=$((removed + 1))
-  fi
-done
-
-echo "done: $installed installed, $updated updated, $removed removed, destination $dest"
+echo "done: $installed installed, $updated updated, destination $dest"
