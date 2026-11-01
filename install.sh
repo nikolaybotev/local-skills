@@ -90,7 +90,7 @@ install_skill() {
   tar -C "$dir" $tar_excludes -cf - . | tar -C "$staging" -xf -
   if [ ! -f "$staging/SKILL.md" ]; then
     rm -rf "$staging"
-    echo "error: failed to stage skill $name" >&2
+    echo "error: staged tree missing SKILL.md for skill $name" >&2
     exit 1
   fi
   previous=""
@@ -100,7 +100,11 @@ install_skill() {
   fi
   if ! mv "$staging" "$target"; then
     if [ -n "$previous" ]; then
-      mv "$previous" "$target"
+      if ! mv "$previous" "$target"; then
+        rm -rf "$staging"
+        echo "error: failed to restore skill $name after install failure" >&2
+        exit 1
+      fi
     fi
     rm -rf "$staging"
     echo "error: failed to install skill $name" >&2
