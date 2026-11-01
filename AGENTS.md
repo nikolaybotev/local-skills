@@ -1,6 +1,6 @@
 # Local Agent Skills
 
-Reusable agent skills for local and cloud agents that read the Agent Skills layout. Skill sources live under `.agents/skills/`. The current change is documented in `intent/config-as-code/`.
+Reusable agent skills for local and cloud agents that read the Agent Skills layout. Skill sources live under `.agents/skills/`. The current change is documented in `intent/ship-whole/` (Status Finished).
 
 ## Commands
 

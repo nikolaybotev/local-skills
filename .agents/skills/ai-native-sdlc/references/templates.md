@@ -31,11 +31,11 @@ Use these shapes. Replace the bracketed text. Keep the header table. Relative li
 
 ## Constraints and principles
 
-- <What must stay true. A principle the originator stated is a principle, even if it sounds optional.>
+- <What should stay true. A principle the originator stated is a principle, even if it sounds optional.>
 
 ## Open questions (carried into spec.md)
 
-1. <Question the spec must answer or explicitly defer.>
+1. <spec should answer or explicitly defer. A settled cut is not an open question.>
 
 ## Original prompt (verbatim)
 
@@ -70,7 +70,7 @@ When it did: cite the chat, then paste the exchange. No interpretation in this s
 
 -
 
-**Release phasing.** <If some goals are later: what ships first, what is tagged as later, and that untagged requirements belong to the first release.>
+**Release phasing.** This release is what the plan still claims. A sequenced release and an optional item stay on this intent. Staying is not an exemption from a recorded cut. Postponed work points at the skill's new-intent sentence and is not tagged on this spec.
 
 ## 3. Principles
 
@@ -80,7 +80,7 @@ When it did: cite the chat, then paste the exchange. No interpretation in this s
 
 ## 5. Functional requirements
 
-<Numbered, testable. Later-release items tagged.>
+<Numbered, testable requirements for this release.>
 
 ## 6. Acceptance criteria
 
@@ -108,11 +108,13 @@ Add sections the product needs (data sources, security, non-functional requireme
 | Status | Draft 1 |
 | Stage | 3 · Build |
 
-Spec wins. Update this file in the same change whenever implementation departs from it.
+Spec wins. An amendment that keeps the goals is written into the spec in the same commit, and the coverage row moves in that commit. An amendment that drops a goal is a cut. A procedure fix that does not contradict the spec is recorded in the plan only. A closed plan shows | Status | Finished | in the header table.
 
 ## Stops
 
 <None, or one hard-to-undo choice, the options, and the resolution once made. This is not an approval role. Most plans have no stops.>
+
+Example named cut: what closed; points at the new-intent sentence.
 
 ## Acceptance-criteria coverage
 
@@ -126,11 +128,11 @@ Files: `<paths>`
 
 1. <step>
 
-DoD: <command that exits non-zero on failure>
+DoD: <command or inspection shown at the commit that exits non-zero when unmet, including when the repo names no required check>
 
 ### Build notes (Phase 0)
 
-<Added only after the phase lands. What was decided or what departed, and the consequence for later phases.>
+<name which definition of done was met>
 ```
 
 Repeat the phase block. A phase that is not yet built has no build notes.
