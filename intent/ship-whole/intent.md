@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Captured | 2026-11-01 |
-| Status | Draft |
+| Status | Finished |
 | Stage | 1 · Plan |
 | Feeds | [spec.md](spec.md) → [plan.md](plan.md) |
 

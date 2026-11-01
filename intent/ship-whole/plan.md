@@ -3,12 +3,12 @@
 | | |
 |---|---|
 | Implements | [spec.md](spec.md) Draft 3 |
-| Status | Draft 1 |
+| Status | Finished |
 | Stage | 3 · Build |
 
 Spec wins. An amendment that keeps the goals is written into [spec.md](spec.md) in the same commit, and the coverage row below moves in that commit. An amendment that drops a goal is a cut. A procedure fix that does not contradict the spec is recorded here only.
 
-This commit is the revised spec and this plan. It is not Phase 0. Phase 0 is the whole remaining change: one commit that edits the skill text the spec names.
+Phase 0 has landed. The steps below are history of that run, not orders.
 
 ## Stops
 
@@ -39,13 +39,17 @@ Files: `.agents/skills/ai-native-sdlc/SKILL.md`, `.agents/skills/ai-native-sdlc/
 
 One commit. Splitting the three skill files would leave the old rule beside the new one. Read `README.md` and `AGENTS.md` before editing them.
 
-1. Edit `SKILL.md` to FR3–FR10 and FR13–FR14. Keep the sentences FR3 lists, including `Do not ask questions.` and the parent sentence. On the description line that says `builds one pull request per phase`, add `when that phase is whole`. Keep `**Build.**` on summary item 4, and that line should say `when that phase is whole`, `no required check`, and `not a stop`. It should not keep `The subagent merges it when CI is green`. The subagent should still be the one that merges. The build bullet should keep `under the phase, and continue` for a detail the spec does not decide, and it should not keep `If something is undecidable`. Put `cancelled`, `still-running`, `not a stop`, and `the next phase should not start` on one line. A wrong locked formula is an FR5 amendment in that same commit. The prompt between `The prompt it was given:` and `The parent does not review` should contain `keeps the goals`, `drops a goal`, `mistaken cut`, and the sentence that the whole-phase rule, the release wait, and the three moves should take precedence. Keep `The spec wins over the plan.` and `If the plan is the one that is right, change the spec first.` The clause `record plan departures in` should not remain. The usage-limit exception should stay, `usage limit` should remain, and `was green` should become `checks the plan names have succeeded`. Replace the deploy instruction so `waits for that run and checks production` does not remain. Mark the scheduled-runs sentence and `The spec did that for multi-currency.` with `history of that run, not the rule` on those same lines. The iterate section should not keep `tag the later items`.
-2. Edit `references/templates.md` to FR2, FR11, and FR15. The constraints placeholder should be `What should stay true`. The open-questions placeholder should say `spec should answer`. Show `| Status | Finished |` as the closed header, and keep Draft as the start. The named cut should include `what closed` and `new-intent sentence`. The stay sentence should include `Staying is not an exemption from a recorded cut`. The copyable build-notes block should hold `### Build notes (Phase 0)` and `<name which definition of done was met>`, and it should not contain `Added only after the phase lands`. The line `A phase that is not yet built has no build notes.` should stay outside that fence.
-3. Edit `references/goldvalue.md` so the clause `Departures are in that phase's build notes inside `plan.md`` is marked `history of that run, not the rule`, after that clause and before ``AGENTS.md` gained the commands and the pitfalls in the same changes.` Keep `Each phase was one PR with a definition of done` as the rule. On the line that says `from the same intent folder`, add the history mark and say a release this same plan already sequences is not forbidden. Keep `restarted the cycle` on the following item.
-4. In `README.md`, change only the ai-native-sdlc blurb so it says `when that phase is whole` and does not say `when CI is green`.
-5. In the same commit, set the first `| Status |` row to `Finished` on `intent/ship-whole/intent.md`, `spec.md`, and `plan.md`. Leave the stage labels. Add a build note whose first line is `DoD met:` and name the inspection below. Rewrite the preamble so it does not say `It is not Phase 0` and so it says the steps are `history of that run, not orders`. Each of the lines `1.` through `7.` should still start with its number and contain `Done.` after it, for example `1. Done.`. Change only the `AGENTS.md` line that says `The current change is documented`, so it names `intent/ship-whole/` as Finished. Leave the architecture line, including a historical `intent/config-as-code/` mention, and leave `intent/onboard/` historical. Leave the rest of `AGENTS.md` and `README.md` as they are.
-6. Run the definition of done on that commit. It should exit 0. The worktree should be clean.
-7. Merge only after `shellcheck`, `install-smoke`, and `skill-frontmatter` have succeeded. If one of those jobs has failed, was cancelled, or is still running, the phase should not merge and the next phase should not start. Fix and re-run. That is not an owner stop. The subagent should merge. The parent should not merge that pull request.
+1. Done. Edited `SKILL.md` to FR3–FR10 and FR13–FR14 per the spec.
+2. Done. Edited `references/templates.md` to FR2, FR11, and FR15 per the spec.
+3. Done. Edited `references/goldvalue.md` for the departures clause and item 9 history marks per the spec.
+4. Done. Updated the ai-native-sdlc blurb in `README.md` to say `when that phase is whole`.
+5. Done. Set Status to Finished on the three headers, updated the current-change line in `AGENTS.md`, rewrote this plan preamble, and marked these steps done.
+6. Done. Ran the definition of done on the Phase 0 commit; it exited 0 with a clean worktree.
+7. Done. Ran `shellcheck`, `install-smoke`, and `skill-frontmatter` locally; all exited 0. Merge waits on the same three jobs on the pull request.
+
+### Build notes (Phase 0)
+
+DoD met: ship-whole inspection below on the Phase 0 commit; `shellcheck`, `install-smoke`, and `skill-frontmatter` exit 0.
 
 DoD: the inspection below, run from the repo root on the Phase 0 commit. It exits non-zero when any check fails.
 

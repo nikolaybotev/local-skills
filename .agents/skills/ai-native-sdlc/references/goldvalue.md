@@ -15,8 +15,8 @@ Do not copy goldvalue's domain rules into another repo. Copy the sequence.
 5. Load-bearing claims were checked against live sources. Early drafts had the wrong BIS quote direction (currency per USD, so series are inverted), the wrong start dates, a DEM series that does not exist, and a gzip size that was estimated at ~200 KB and measured at ~77 KB.
 6. Before the build gate, a fresh-context reviewer read the spec against the intent, then another read the plan. Findings were applied by the parent. Two sessions editing `spec.md` at once collided; one stood down.
 7. Owner gate G0 stopped the build: publishing LBMA prices would redistribute licensed data. The user chose option A. The spec records D15 and the plan records the gate as resolved. Build started only after that.
-8. Each phase was one PR with a definition of done. Departures are in that phase's build notes inside `plan.md` (month-to-date decided by `today`, batch number formatting, the `usd` header rule). `AGENTS.md` gained the commands and the pitfalls in the same changes.
-9. v1.0.0 shipped at the end of Phase 5, v1.1.0 after the FX phases, from the same intent folder.
+8. Each phase was one PR with a definition of done. Departures are in that phase's build notes inside `plan.md` (month-to-date decided by `today`, batch number formatting, the `usd` header rule). history of that run, not the rule `AGENTS.md` gained the commands and the pitfalls in the same changes.
+9. v1.0.0 shipped at the end of Phase 5, v1.1.0 after the FX phases, from the same intent folder. history of that run, not the rule A release this same plan already sequences is not forbidden by that mark.
 10. v1.2 restarted the cycle in `intent/v1.2-smoothed-gold/`, linked to `companion-app`. Its plan is two PRs with deviations written back, not a rewrite of the v1 plan.
 
 ## Layout that resulted
