@@ -251,9 +251,19 @@ if gold.find(g8live) > gold.find(depart_line):
     die("item 8 history paragraph precedes live sentences")
 g9live = line_with(gold, "A release this same plan already sequences should stay on this intent", "goldvalue.md")
 hist9 = line_with(gold, "from the same intent folder", "goldvalue.md")
-need(hist9, "(history of that run, not the rule)", "item 9")
+if "(history of that run, not the rule)" in hist9:
+    die("item 9 version ship should not be marked history")
+retired9 = line_with(gold, "Tagging the later release on the spec", "goldvalue.md")
+need(retired9, "(history of that run, not the rule)", "item 9 retired clause")
 if gold.find(g9live) > gold.find(hist9):
-    die("item 9 history paragraph precedes live sentence")
+    die("item 9 example precedes live sentence")
+if gold.find(hist9) > gold.find(retired9):
+    die("item 9 retired history precedes version ship example")
+deploy = line_with(skill, "Goldvalue's `deploy-pages` runs on push to `main` and on a daily schedule", "SKILL.md")
+if "(history of that run, not the rule)" in deploy:
+    die("deploy-pages line should not be marked history")
+need(skill, "goals and acceptance intact", "SKILL.md iterate during-build")
+need(skill, "the phase should not merge until it is settled", "SKILL.md iterate during-build")
 need(gold, "PR 15 then PR 16", "goldvalue.md")
 need(gold, "restarted the cycle", "goldvalue.md")
 

@@ -21,7 +21,9 @@ Departures are in that phase's build notes inside `plan.md` (month-to-date decid
 
 9. A release this same plan already sequences should stay on this intent.
 
-v1.0.0 shipped at the end of Phase 5, v1.1.0 after the FX phases, from the same intent folder (history of that run, not the rule).
+v1.0.0 shipped at the end of Phase 5, v1.1.0 after the FX phases, from the same intent folder.
+
+Tagging the later release on the spec (history of that run, not the rule).
 
 10. v1.2 restarted the cycle in `intent/v1.2-smoothed-gold/`, linked to `companion-app`. Its plan is two PRs with deviations written back, not a rewrite of the v1 plan.
 
